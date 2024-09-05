@@ -1,8 +1,14 @@
 <script lang="ts">
 	import { wallet } from '$lib/wallet';
 	import { onMount } from 'svelte';
+	import type { PageData } from './$types';
+	import { invalidateAll } from '$app/navigation';
 
-	let shipments = $derived(async () => {});
+	const {
+		data
+	}: {
+		data: PageData;
+	} = $props();
 
 	onMount(async () => {
 		if (!$wallet.connected) await wallet.connect();
@@ -14,7 +20,7 @@
 
 		console.log(balance);
 		console.log('idenity', $wallet.identity.getPrincipal().toString());
-		await wallet.approve(300n);
+		await wallet.approve(balance);
 
 		const error = await $wallet.actor.createShipment('Ja', {
 			destination: { lat: 0, lng: 0, street: '' },
@@ -36,13 +42,9 @@
 		console.log(shipments);
 	});
 
-	// console.log();
+	invalidateAll();
 </script>
 
-<!-- {#await shipments()}
-	Fetching shipments...
-{:then value}
-	{#each value as shipment}
-		<div>{shipment}</div>
-	{/each}
-{/await} -->
+{#each data.shipments as shipment}
+	<div>{shipment.id}</div>
+{/each}
