@@ -14,8 +14,6 @@
 		data: PageData;
 	} = $props();
 
-	invalidateAll();
-
 	function selectShipment(id: bigint) {
 		console.log(id);
 		selected = data.shipments.find((shipment) => shipment.id === id) ?? undefined;
