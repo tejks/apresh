@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { defaultLocation, type Coords } from '$lib/common';
+	import { type Coords } from '$lib/common';
 	import { wallet } from '$lib/wallet';
 	import Picker from '../components/Picker.svelte';
 
