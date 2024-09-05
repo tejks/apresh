@@ -27,6 +27,14 @@ function createWallet() {
 			console.log(identity.getPrincipal().toText());
 			set({ connected: true, actor, tokenActor, identity });
 		},
+		getTransferFee: async () => {
+			const current = get(wallet);
+			if (!current.connected) await wallet.connect();
+			if (!current.connected) throw new Error('Not connected');
+
+			const fee = await current.tokenActor.icrc1_fee();
+			return fee;
+		},
 		approve: async (amount: bigint) => {
 			const current = get(wallet);
 			if (!current.connected) await wallet.connect();
