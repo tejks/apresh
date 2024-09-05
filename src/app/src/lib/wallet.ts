@@ -1,9 +1,10 @@
 import type { ActorSubclass, Identity } from '@dfinity/agent';
 import { get, writable } from 'svelte/store';
 import type { _SERVICE } from '../../../declarations/contract/contract.did';
+import { canisterId } from '../../../declarations/contract';
 import type { _SERVICE as _ICRC1_SERVICE } from '../../../declarations/icrc1_ledger_canister/icrc1_ledger_canister.did';
 import { connect } from './canisters';
-import type { Principal } from '@dfinity/principal';
+import { Principal } from '@dfinity/principal';
 
 export const wallet = createWallet();
 
@@ -26,10 +27,13 @@ function createWallet() {
 			console.log(identity.getPrincipal().toText());
 			set({ connected: true, actor, tokenActor, identity });
 		},
-		approve: async (amount: bigint, spender: Principal) => {
+		approve: async (amount: bigint) => {
 			const current = get(wallet);
 			if (!current.connected) await wallet.connect();
 			if (!current.connected) throw new Error('Not connected');
+
+			const spender = Principal.fromText(canisterId);
+
 			current.tokenActor.icrc2_approve({
 				fee: [],
 				from_subaccount: [],
@@ -40,6 +44,17 @@ function createWallet() {
 				expires_at: [],
 				spender: { owner: spender, subaccount: [] }
 			});
+		},
+		balance: async () => {
+			const current = get(wallet);
+			if (!current.connected) await wallet.connect();
+			if (!current.connected) throw new Error('Not connected');
+
+			const balance = await current.tokenActor.icrc1_balance_of({
+				owner: current.identity.getPrincipal(),
+				subaccount: []
+			});
+			return balance;
 		}
 	};
 }
