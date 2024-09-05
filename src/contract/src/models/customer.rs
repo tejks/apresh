@@ -8,6 +8,7 @@ pub type CustomerId = Principal;
 pub struct Customer {
     id: CustomerId,
     name: String,
+    shipments_sent: u32,
     shipments: Vec<ShipmentIdInner>,
 }
 
@@ -17,11 +18,17 @@ impl Customer {
             id,
             name,
             shipments: vec![],
+            shipments_sent: 0,
         }
     }
 
     pub fn add_shipment(&mut self, shipment_id: ShipmentIdInner) {
         self.shipments.push(shipment_id);
+    }
+
+    pub fn finalize_shipment(&mut self, shipment_id: ShipmentIdInner) {
+        self.shipments.retain(|&x| x != shipment_id);
+        self.shipments_sent += 1;
     }
 
     pub fn id(&self) -> Principal {

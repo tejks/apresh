@@ -2,10 +2,15 @@ mod models;
 mod state;
 mod transfer;
 
+use std::thread::AccessError;
+
 use anyhow::anyhow;
 use candid::Principal;
 use ic_cdk::{init, query, update};
-use icrc_ledger_types::icrc1::transfer::NumTokens;
+use icrc_ledger_types::icrc1::{
+    account::{self, Account},
+    transfer::NumTokens,
+};
 use models::{
     customer::Customer,
     shipment::{Shipment, ShipmentInfo, ShipmentLocation, SizeCategory},
@@ -70,6 +75,49 @@ fn init() {
 
         // Insert the shipment into the SHIPMENTS collection
         SHIPMENTS.with_borrow_mut(|shipments| shipments.insert(inner_shipment_id, shipment));
+    }
+}
+
+#[update(name = "finalizeShipment")]
+async fn finalize_shipment(shipment_id: ShipmentIdInner) -> Result<(), String> {
+    let (finalize_result, carrier, value, price) = SHIPMENTS
+        .with_borrow_mut(|shipments| {
+            let shipment = shipments
+                .get_mut(&shipment_id)
+                .ok_or(anyhow!("Shipment not found"))?;
+
+            CUSTOMERS.with_borrow_mut(|customers| {
+                let customer = customers
+                    .get_mut(&shipment.customer_id())
+                    .ok_or(anyhow!("Customer not found"))?;
+
+                CARRIERS.with_borrow_mut(|carriers| {
+                    let carrier = carriers
+                        .get_mut(&shipment.carrier_id().ok_or(anyhow!("Carrier not found"))?)
+                        .ok_or(anyhow!("Customer not found"))?;
+
+                    Ok((
+                        shipment.finalize(carrier, customer),
+                        carrier.id(),
+                        shipment.info().value(),
+                        shipment.info().price(),
+                    ))
+                })
+            })
+        })
+        .map_err(|e: anyhow::Error| e.to_string())?;
+
+    let transfer_out_carrier_args = transfer::TransferOutParams {
+        amount: NumTokens::from(value + price),
+        to: carrier.into(),
+        memo: None,
+    };
+
+    match finalize_result {
+        Ok(_) => transfer::transfer_out(transfer_out_carrier_args)
+            .await
+            .map_err(|e| e.to_string()),
+        Err(e) => Err(e.to_string()),
     }
 }
 

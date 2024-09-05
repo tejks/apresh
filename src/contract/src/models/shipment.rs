@@ -100,8 +100,24 @@ impl Shipment {
             created_at,
         };
 
-
         shipment
+    }
+
+    pub fn finalize(
+        &mut self,
+        carrier: &mut Carrier,
+        customer: &mut Customer,
+    ) -> anyhow::Result<()> {
+        if self.status != ShipmentStatus::InTransit {
+            return Err(anyhow::anyhow!("shipment is not ready to be finalized"));
+        }
+
+        self.status = ShipmentStatus::Delivered;
+
+        carrier.finalize_shipment(self.id());
+        customer.finalize_shipment(self.id());
+
+        Ok(())
     }
 
     pub fn buy(&mut self, carrier: &mut Carrier) -> anyhow::Result<()> {
@@ -111,6 +127,8 @@ impl Shipment {
 
         self.carrier = Some(carrier.id());
         self.status = ShipmentStatus::InTransit;
+
+        
         carrier.add_shipment(self.id());
 
         Ok(())
@@ -122,6 +140,10 @@ impl Shipment {
 
     pub fn customer_id(&self) -> Principal {
         self.customer
+    }
+
+    pub fn carrier_id(&self) -> Option<Principal> {
+        self.carrier
     }
 
     pub fn id(&self) -> ShipmentIdInner {
