@@ -1,9 +1,12 @@
 import { createActor, canisterId } from '../../../declarations/contract';
 import { canisterId as identityCanisterId } from '../../../declarations/internet_identity';
+import {
+	canisterId as tokenCanisterId,
+	createActor as createTokenActor
+} from '../../../declarations/icrc1_ledger_canister';
 import { AuthClient } from '@dfinity/auth-client';
 
-
-const host = `http://localhost:4943`
+const host = `http://localhost:4943`;
 
 export const anonymousBackend = createActor(canisterId, { agentOptions: { host } });
 
@@ -20,9 +23,16 @@ export const connect = async () => {
 	const identity = authClient.getIdentity();
 	const actor = createActor(canisterId, {
 		agentOptions: {
-			identity, host
+			identity,
+			host
+		}
+	});
+	const tokenActor = createTokenActor(tokenCanisterId, {
+		agentOptions: {
+			identity,
+			host
 		}
 	});
 
-	return { actor, identity };
+	return { actor, tokenActor, identity };
 };

@@ -1,3 +1,4 @@
+type Result = variant { Ok; Err : text };
 type Shipment = record {
   id : nat64;
   status : ShipmentStatus;
@@ -20,7 +21,7 @@ type SizeCategory = variant {
   Envelope;
 };
 service : {
-  createShipment : (text, ShipmentInfo) -> ();
+  createShipment : (text, ShipmentInfo) -> (Result);
   listPendingShipments : () -> (vec Shipment) query;
   listUserShipments : () -> (vec Shipment) query;
 }
