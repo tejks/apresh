@@ -78,6 +78,13 @@ impl Shipments {
             .cloned()
             .collect()
     }
+
+    pub fn get_all_for_shipper(&self, carrier_id: &carrier::CarrierId) -> Vec<shipment::Shipment> {
+        self.values()
+            .filter(|shipment| shipment.carrier_id() == Some(*carrier_id))
+            .cloned()
+            .collect()
+    }
 }
 
 impl Customers {
