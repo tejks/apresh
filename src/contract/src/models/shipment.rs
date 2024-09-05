@@ -28,6 +28,12 @@ pub struct ShipmentInfo {
     size_category: SizeCategory,
 }
 
+impl ShipmentInfo {
+    pub fn price(&self) -> u64 {
+        self.price
+    }
+}
+
 #[derive(Deserialize, Serialize, Debug, Clone, CandidType, PartialEq, Eq)]
 pub enum ShipmentStatus {
     Pending,

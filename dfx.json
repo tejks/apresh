@@ -1,5 +1,12 @@
 {
   "canisters": {
+    "icrc1_ledger_canister": {
+      "candid": "https://raw.githubusercontent.com/dfinity/ic/35bfcadd0f2a474057e42393917b8b3ac269627a/rs/rosetta-api/icrc1/ledger/ledger.did",
+      "frontend": {},
+      "specified_id": "mxzaz-hqaaa-aaaar-qaada-cai",
+      "type": "custom",
+      "wasm": "https://download.dfinity.systems/ic/35bfcadd0f2a474057e42393917b8b3ac269627a/canisters/ic-icrc1-ledger.wasm.gz"
+    },
     "internet_identity": {
       "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
       "frontend": {},
