@@ -10,7 +10,7 @@
 		if (!$wallet.connected) await wallet.connect();
 		if (!$wallet.connected) return;
 
-		greeting = await $wallet.actor.greet(name);
+		// greeting = await $wallet.actor.greet(name);
 	}
 
 	function onLocationChange(coords: Coords) {
