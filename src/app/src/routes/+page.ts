@@ -7,29 +7,32 @@ export async function load({}): Promise<{
 	shipments: Shipment[];
 	registeredCarrier: boolean;
 	registeredCustomer: boolean;
-	owned: Shipment[];
+	carried: Shipment[];
+	created: Shipment[];
 }> {
 	const shipments = await anonymousBackend.listPendingShipments();
 
 	let registeredCarrier = false;
 	let registeredCustomer = false;
-	let owned: Shipment[] = [];
+	let carried: Shipment[] = [];
+	let created: Shipment[] = [];
 
 	if (stateWallet.actor) {
 		const [car, cus] = await stateWallet.actor.roles();
 		registeredCarrier = car;
 		registeredCustomer = cus;
 		if (registeredCarrier) {
-			owned = await stateWallet.actor.listUserShipments();
+			let [car, cus] = await stateWallet.actor.listUserShipments();
+			carried = car;
+			created = cus;
 		}
 	}
-
-	console.log('shipments', shipments);
 
 	return {
 		shipments,
 		registeredCarrier,
 		registeredCustomer,
-		owned
+		carried,
+		created
 	};
 }

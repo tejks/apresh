@@ -141,10 +141,12 @@ fn get_pending_shipments() -> Vec<Shipment> {
 }
 
 #[query(name = "listUserShipments")]
-fn get_user_shipments() -> Vec<Shipment> {
+fn get_user_shipments() -> (Vec<Shipment>, Vec<Shipment>) {
     let customer_id = ic_cdk::caller();
 
-    SHIPMENTS.with_borrow(|shipments| shipments.get_all_for_customer(&customer_id))
+    let shippers = SHIPMENTS.with_borrow(|shipments| shipments.get_all_for_shipper(&customer_id));
+    let customers = SHIPMENTS.with_borrow(|shipments| shipments.get_all_for_customer(&customer_id));
+    (shippers, customers)
 }
 
 #[query()]
