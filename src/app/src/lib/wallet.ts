@@ -20,6 +20,7 @@ function createWallet() {
 		subscribe,
 		connect: async () => {
 			const { actor, identity } = await connect();
+			console.log(identity.getPrincipal().toText())
 			set({ connected: true, actor, identity });
 		}
 	};
