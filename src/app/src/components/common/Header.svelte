@@ -14,5 +14,5 @@
 				<Button onClick={async () => await wallet.connect()}>Connect wallet</Button>
 			{/if}
 		</div>
-	</div> -->
-<!-- </header>
+	</div>
+</header>
