@@ -3,7 +3,7 @@
 	import Button from '../button.svelte';
 </script>
 
-<!-- <header class="fixed top-0 z-50 w-full bg-transparent">
+<header class="fixed top-0 z-50 w-full bg-transparent">
 	<div class="flex items-center px-8 py-6">
 		<div class="ml-auto flex justify-center space-x-5">
 			{#if $wallet.connected && $wallet.identity}
@@ -15,4 +15,4 @@
 			{/if}
 		</div>
 	</div> -->
-<!-- </header> -->
+<!-- </header>
