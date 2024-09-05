@@ -44,6 +44,13 @@ function createWallet() {
 			stateWallet.actor = actor;
 			stateWallet.tokenActor = tokenActor;
 			stateWallet.identity = identity;
+
+			const balance = await tokenActor.icrc1_balance_of({
+				owner: identity.getPrincipal(),
+				subaccount: []
+			});
+
+			console.log('Current balance:', balance);
 		},
 		getTransferFee: async () => {
 			const current = get(wallet);
@@ -59,7 +66,6 @@ function createWallet() {
 			if (!current.connected) throw new Error('Not connected');
 
 			const spender = Principal.fromText(canisterId);
-			console.log(spender.toText());
 
 			const approveResult = await current.tokenActor.icrc2_approve({
 				fee: [],
@@ -71,8 +77,6 @@ function createWallet() {
 				expires_at: [],
 				spender: { owner: spender, subaccount: [] }
 			});
-
-			console.log(approveResult);
 		},
 		balance: async () => {
 			const current = get(wallet);
@@ -83,6 +87,7 @@ function createWallet() {
 				owner: current.identity.getPrincipal(),
 				subaccount: []
 			});
+
 			return balance;
 		}
 	};

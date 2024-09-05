@@ -34,5 +34,7 @@ export const connect = async () => {
 		}
 	});
 
+	console.log('Connected to backend as', identity.getPrincipal().toText());
+
 	return { actor, tokenActor, identity };
 };
