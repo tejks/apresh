@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { wallet } from '$lib/wallet';
-	import Button from '../button.svelte';
+	import Button from '../Button.svelte';
 </script>
 
 <header class="fixed top-0 z-50 w-full bg-transparent">
