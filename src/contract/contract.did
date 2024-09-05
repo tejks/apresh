@@ -20,7 +20,7 @@ type SizeCategory = variant {
   Parcel : record { max_height : nat64; max_width : nat64; max_depth : nat64 };
   Envelope;
 };
-service : {
+service : () -> {
   createShipment : (text, ShipmentInfo) -> (Result);
   listPendingShipments : () -> (vec Shipment) query;
   listUserShipments : () -> (vec Shipment) query;
