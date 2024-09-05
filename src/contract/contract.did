@@ -21,6 +21,6 @@ type SizeCategory = variant {
 };
 service : {
   createShipment : (text, ShipmentInfo) -> ();
-  listPending : () -> (vec Shipment) query;
+  listPendingShipments : () -> (vec Shipment) query;
   listUserShipments : () -> (vec Shipment) query;
 }
