@@ -13,10 +13,10 @@
 		const balance = await wallet.balance();
 
 		console.log(balance);
+		console.log('idenity', $wallet.identity.getPrincipal().toString());
+		await wallet.approve(300n);
 
-		await wallet.approve(balance);
-
-		await $wallet.actor.createShipment('Ja', {
+		const error = await $wallet.actor.createShipment('Ja', {
 			destination: { lat: 0, lng: 0, street: '' },
 
 			value: 100n,
@@ -30,6 +30,8 @@
 			},
 			price: 200n
 		});
+
+		console.log(error);
 
 		console.log(shipments);
 	});

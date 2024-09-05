@@ -33,8 +33,9 @@ function createWallet() {
 			if (!current.connected) throw new Error('Not connected');
 
 			const spender = Principal.fromText(canisterId);
+			console.log(spender.toText());
 
-			current.tokenActor.icrc2_approve({
+			const approveResult = await current.tokenActor.icrc2_approve({
 				fee: [],
 				from_subaccount: [],
 				memo: [],
@@ -44,6 +45,8 @@ function createWallet() {
 				expires_at: [],
 				spender: { owner: spender, subaccount: [] }
 			});
+
+			console.log(approveResult);
 		},
 		balance: async () => {
 			const current = get(wallet);
