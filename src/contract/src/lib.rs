@@ -16,6 +16,14 @@ async fn create_shipment(customer_name: String, shipment_info: ShipmentInfo) -> 
     let customer_id = ic_cdk::caller();
     let amount = NumTokens::from(shipment_info.price());
 
+    let transfer_in_args = transfer::TransferInParams {
+        amount: NumTokens::from(amount),
+        from: customer_id.into(),
+        memo: None,
+    };
+
+    transfer_in(transfer_in_args).await.map_err(|e| e.to_string())?;
+
     CUSTOMERS.with_borrow_mut(|customers| {
         let customer = customers.get_or_create(customer_name, customer_id);
         let shipment_id = ShipmentId::new();
@@ -24,13 +32,7 @@ async fn create_shipment(customer_name: String, shipment_info: ShipmentInfo) -> 
         SHIPMENTS.with_borrow_mut(|shipments| shipments.insert(inner_shipment_id, shipment));
     });
 
-    let transfer_in_args = transfer::TransferInParams {
-        amount: NumTokens::from(amount),
-        from: customer_id.into(),
-        memo: None,
-    };
-
-    transfer_in(transfer_in_args).await.map_err(|e| e.to_string())
+    Ok(())
 }
 
 #[query(name = "listPendingShipments")]
