@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { Marker, Popup } from 'svelte-maplibre';
 	import { defaultLocation, type Coords } from '../lib/common';
-	import Button from './button.svelte';
-	import { wallet } from '$lib/wallet';
+	import Button from './Button.svelte';
 
 	let {
 		picked,
@@ -16,7 +15,7 @@
 </script>
 
 <Marker bind:lngLat={location} draggable>
-	<div class="pin active"></div>
+	<div class="pin active bounce-a"></div>
 	<Popup open offset={[-5, -10]}>
 		<div class="text-sm font-bold">{name}</div>
 	</Popup>
@@ -43,23 +42,20 @@
 		margin: -20px 0 0 -20px;
 
 		&.active {
-			background: var(--accent);
+			background: linear-gradient(
+				90deg,
+				rgb(209, 121, 21) 0%,
+				rgb(247, 147, 66) 35%,
+				rgba(0, 212, 255, 1) 100%
+			);
 		}
 
 		&.inactive {
-			background: var(--secondary-200);
+			background: rgb(131, 96, 67);
 		}
 
 		&.destination {
 			background: #f00;
-		}
-
-		&.carrier.inactive {
-			background: var(--primary-200);
-		}
-
-		&.carrier.active {
-			background: var(--primary-600);
 		}
 
 		&:after {
@@ -70,6 +66,48 @@
 			background: #e6e6e6;
 			position: absolute;
 			border-radius: 50%;
+		}
+	}
+
+	.bounce-a {
+		animation-name: bounce-a;
+		animation-fill-mode: both;
+		animation-duration: 1s;
+	}
+
+	@keyframes pulsate {
+		0% {
+			transform: scale(0.1, 0.1);
+			opacity: 0;
+		}
+
+		50% {
+			opacity: 1;
+		}
+
+		100% {
+			transform: scale(1.2, 1.2);
+			opacity: 0;
+		}
+	}
+
+	@keyframes bounce-a {
+		0% {
+			opacity: 0;
+			transform: translateY(-2000px) rotate(-45deg);
+		}
+
+		60% {
+			opacity: 1;
+			transform: translateY(30px) rotate(-45deg);
+		}
+
+		80% {
+			transform: translateY(-10px) rotate(-45deg);
+		}
+
+		100% {
+			transform: translateY(0) rotate(-45deg);
 		}
 	}
 </style>
