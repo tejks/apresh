@@ -35,10 +35,6 @@ pub struct ShipmentInfo {
 }
 
 impl ShipmentInfo {
-    pub fn price(&self) -> u64 {
-        self.price
-    }
-
     pub fn new(
         value: u64,
         price: u64,
