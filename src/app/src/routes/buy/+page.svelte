@@ -33,16 +33,15 @@
 		if (!$wallet.connected) return;
 
 		const fee = await wallet.getTransferFee();
-		wallet.approve(shipment.info.price + fee);
+		wallet.approve(shipment.info.value + fee);
 
 		const error = await $wallet.actor.buyShipment('Jacek', shipment.id);
 		console.log(error);
 
-		// if (error) {
-		// 	console.error(error);
-		// } else {
-		// 	console.log('bought');
-		// }
+		await invalidateAll();
+
+		selected = null;
+		showModal = false;
 	}
 </script>
 
