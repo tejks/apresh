@@ -1,4 +1,5 @@
 use crate::models::{
+    carrier,
     customer::{self, Customer, CustomerId},
     shipment, shipment_id,
 };
@@ -10,12 +11,16 @@ use std::{
 
 type CustomersStore = HashMap<customer::CustomerId, customer::Customer>;
 type ShipmentsStore = HashMap<shipment_id::ShipmentIdInner, shipment::Shipment>;
+type CarriersStore = HashMap<carrier::CarrierId, carrier::Carrier>;
 
 #[derive(Default)]
 pub struct Customers(CustomersStore);
 
 #[derive(Default)]
 pub struct Shipments(ShipmentsStore);
+
+#[derive(Default)]
+pub struct Carriers(CarriersStore);
 
 impl Deref for Shipments {
     type Target = ShipmentsStore;
@@ -45,6 +50,20 @@ impl DerefMut for Customers {
     }
 }
 
+impl Deref for Carriers {
+    type Target = CarriersStore;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Carriers {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
 impl Shipments {
     pub fn get_all_pending(&self) -> Vec<shipment::Shipment> {
         self.values()
@@ -58,7 +77,6 @@ impl Shipments {
             .filter(|shipment| shipment.customer_id() == *customer_id)
             .cloned()
             .collect()
-            
     }
 }
 
@@ -79,8 +97,26 @@ impl Customers {
     }
 }
 
+impl Carriers {
+    pub fn get_or_create(
+        &mut self,
+        carrier_id: carrier::CarrierId,
+        carrier_name: String,
+    ) -> &mut carrier::Carrier {
+        let carrier_exists = self.get_mut(&carrier_id).is_some();
+
+        if !carrier_exists {
+            let carrier = carrier::Carrier::new(carrier_id, carrier_name);
+            self.insert(carrier_id, carrier);
+        }
+
+        self.get_mut(&carrier_id).expect("")
+    }
+}
+
 thread_local! {
     pub static CUSTOMERS: RefCell<Customers> = Default::default();
     pub static SHIPMENT_COUNTER: RefCell<u64> = Default::default();
     pub static SHIPMENTS: RefCell<Shipments> = Default::default();
+    pub static CARRIERS: RefCell<Carriers> = Default::default();
 }

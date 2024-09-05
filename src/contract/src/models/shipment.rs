@@ -1,4 +1,4 @@
-use super::{customer::Customer, shipment_id::ShipmentIdInner};
+use super::{carrier::Carrier, customer::Customer, shipment_id::ShipmentIdInner};
 use candid::{CandidType, Principal};
 use serde::{Deserialize, Serialize};
 
@@ -39,6 +39,10 @@ impl ShipmentInfo {
         self.price
     }
 
+    pub fn value(&self) -> u64 {
+        self.value
+    }
+
     pub fn new(
         value: u64,
         price: u64,
@@ -67,6 +71,7 @@ pub enum ShipmentStatus {
 #[derive(Deserialize, Serialize, Debug, Clone, CandidType)]
 pub struct Shipment {
     id: ShipmentIdInner,
+    name: String,
     info: ShipmentInfo,
     status: ShipmentStatus,
     carrier: Option<Principal>,
@@ -75,7 +80,12 @@ pub struct Shipment {
 }
 
 impl Shipment {
-    pub fn create(creator: &mut Customer, id: ShipmentIdInner, info: ShipmentInfo) -> Self {
+    pub fn create(
+        creator: &mut Customer,
+        id: ShipmentIdInner,
+        name: String,
+        info: ShipmentInfo,
+    ) -> Self {
         let created_at = ic_cdk::api::time();
 
         creator.add_shipment(id);
@@ -83,13 +93,27 @@ impl Shipment {
         let shipment = Self {
             id,
             info,
+            name,
             status: ShipmentStatus::Pending,
             carrier: None,
             customer: creator.id(),
             created_at,
         };
 
+
         shipment
+    }
+
+    pub fn buy(&mut self, carrier: &mut Carrier) -> anyhow::Result<()> {
+        if self.status != ShipmentStatus::Pending {
+            return Err(anyhow::anyhow!("shipment is not pending"));
+        }
+
+        self.carrier = Some(carrier.id());
+        self.status = ShipmentStatus::InTransit;
+        carrier.add_shipment(self.id());
+
+        Ok(())
     }
 
     pub fn status(&self) -> &ShipmentStatus {
@@ -98,5 +122,13 @@ impl Shipment {
 
     pub fn customer_id(&self) -> Principal {
         self.customer
+    }
+
+    pub fn id(&self) -> ShipmentIdInner {
+        self.id
+    }
+
+    pub fn info(&self) -> &ShipmentInfo {
+        &self.info
     }
 }
