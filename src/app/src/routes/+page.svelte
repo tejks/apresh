@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { defaultLocation } from '$lib/common';
+	import { type Coords } from '$lib/common';
 	import { wallet } from '$lib/wallet';
 	import Picker from '../components/Picker.svelte';
 
@@ -9,11 +9,15 @@
 	async function onSubmit(event: MouseEvent) {
 		if (!$wallet.connected) await wallet.connect();
 		if (!$wallet.connected) return;
-
-		greeting = await $wallet.actor.greet(name);
 	}
 
-	let picked = $state(defaultLocation);
+	function onLocationChange(coords: Coords) {
+		console.log(coords);
+	}
+
+	let showModal = $state(true);
 </script>
 
-<Picker bind:picked name="From" />
+{#if showModal}
+	<Picker name="From" picked={onLocationChange} />
+{/if}

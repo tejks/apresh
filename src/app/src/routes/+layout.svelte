@@ -1,8 +1,8 @@
 <script>
+	import { defaultLocation } from '$lib/common';
 	import { GeolocateControl, MapLibre } from 'svelte-maplibre';
 	import Header from '../components/common/Header.svelte';
 	import '../styles.scss';
-	import { defaultLocation } from '$lib/common';
 </script>
 
 <main>
@@ -23,6 +23,3 @@
 		<slot />
 	</MapLibre>
 </main>
-
-<style lang="scss">
-</style>
