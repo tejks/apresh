@@ -7,12 +7,25 @@ import { connect } from './canisters';
 import { Principal } from '@dfinity/principal';
 
 export const wallet = createWallet();
+export let stateWallet: MaybeWallet = $state({
+	connected: false,
+	actor: undefined,
+	tokenActor: undefined,
+	identity: undefined
+});
 
-interface Wallet {
+export interface Wallet {
 	connected: true;
 	actor: ActorSubclass<_SERVICE>;
 	tokenActor: ActorSubclass<_ICRC1_SERVICE>;
 	identity: Identity;
+}
+
+export interface MaybeWallet {
+	connected: boolean;
+	actor: ActorSubclass<_SERVICE> | undefined;
+	tokenActor: ActorSubclass<_ICRC1_SERVICE> | undefined;
+	identity: Identity | undefined;
 }
 
 function createWallet() {
@@ -25,7 +38,12 @@ function createWallet() {
 		connect: async () => {
 			const { actor, tokenActor, identity } = await connect();
 			console.log(identity.getPrincipal().toText());
-			set({ connected: true, actor, tokenActor, identity });
+			const wallet = { connected: true, actor, tokenActor, identity };
+			set(wallet);
+			stateWallet.connected = true;
+			stateWallet.actor = actor;
+			stateWallet.tokenActor = tokenActor;
+			stateWallet.identity = identity;
 		},
 		getTransferFee: async () => {
 			const current = get(wallet);

@@ -4,6 +4,7 @@ type Shipment = record {
   status : ShipmentStatus;
   customer : principal;
   info : ShipmentInfo;
+  name : text;
   created_at : nat64;
   carrier : opt principal;
 };
@@ -20,8 +21,10 @@ type SizeCategory = variant {
   Parcel : record { max_height : nat64; max_width : nat64; max_depth : nat64 };
   Envelope;
 };
-service : {
-  createShipment : (text, ShipmentInfo) -> (Result);
+service : () -> {
+  buyShipment : (text, nat64) -> (Result);
+  createShipment : (text, text, ShipmentInfo) -> (Result);
   listPendingShipments : () -> (vec Shipment) query;
-  listUserShipments : () -> (vec Shipment) query;
+  listUserShipments : () -> (vec Shipment, vec Shipment) query;
+  roles : () -> (bool, bool) query;
 }

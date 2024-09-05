@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { wallet } from '$lib/wallet';
+	import { wallet } from '$lib/wallet.svelte';
 	import Button from '../Button.svelte';
 </script>
 

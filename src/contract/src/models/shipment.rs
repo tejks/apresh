@@ -100,7 +100,6 @@ impl Shipment {
             created_at,
         };
 
-
         shipment
     }
 
@@ -122,6 +121,10 @@ impl Shipment {
 
     pub fn customer_id(&self) -> Principal {
         self.customer
+    }
+
+    pub fn carrier_id(&self) -> Option<Principal> {
+        self.carrier
     }
 
     pub fn id(&self) -> ShipmentIdInner {

@@ -1,7 +1,14 @@
 <script lang="ts">
 	import { type Coords } from '$lib/common';
-	import { wallet } from '$lib/wallet';
+	import { wallet } from '$lib/wallet.svelte';
 	import Picker from '../components/Picker.svelte';
+	import type { PageData } from './$types';
+
+	const {
+		data
+	}: {
+		data: PageData;
+	} = $props();
 
 	let greeting = $state('');
 	let name = $state('');
