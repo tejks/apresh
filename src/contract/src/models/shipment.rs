@@ -19,6 +19,12 @@ pub struct ShipmentLocation {
     lng: f64,
 }
 
+impl ShipmentLocation {
+    pub fn new(street: String, lat: f64, lng: f64) -> Self {
+        Self { street, lat, lng }
+    }
+}
+
 #[derive(Deserialize, Serialize, Debug, Clone, CandidType)]
 pub struct ShipmentInfo {
     value: u64,
@@ -26,6 +32,24 @@ pub struct ShipmentInfo {
     source: ShipmentLocation,
     destination: ShipmentLocation,
     size_category: SizeCategory,
+}
+
+impl ShipmentInfo {
+    pub fn new(
+        value: u64,
+        price: u64,
+        source: ShipmentLocation,
+        destination: ShipmentLocation,
+        size_category: SizeCategory,
+    ) -> Self {
+        Self {
+            value,
+            price,
+            source,
+            destination,
+            size_category,
+        }
+    }
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, CandidType, PartialEq, Eq)]
