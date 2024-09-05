@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { wallet } from '$lib/wallet';
+	import { wallet } from '$lib/wallet.svelte';
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 	import { invalidateAll } from '$app/navigation';
@@ -13,39 +13,6 @@
 	}: {
 		data: PageData;
 	} = $props();
-
-	onMount(async () => {
-		if (!$wallet.connected) await wallet.connect();
-		if (!$wallet.connected) return [];
-
-		let shipments = await $wallet.actor.listPendingShipments();
-
-		const balance = await wallet.balance();
-
-		console.log(balance);
-		console.log('idenity', $wallet.identity.getPrincipal().toString());
-		const fee = await wallet.getTransferFee();
-		await wallet.approve(200n + fee);
-
-		// const error = await $wallet.actor.createShipment('Ja', {
-		// 	destination: { lat: 0, lng: 0, street: '' },
-
-		// 	value: 100n,
-		// 	source: { lat: 0, lng: 0, street: '' },
-		// 	size_category: {
-		// 		Parcel: {
-		// 			max_depth: 0n,
-		// 			max_height: 0n,
-		// 			max_width: 0n
-		// 		}
-		// 	},
-		// 	price: 200n
-		// });
-
-		// console.log(error);
-
-		console.log(shipments);
-	});
 
 	invalidateAll();
 
@@ -65,10 +32,11 @@
 		if (!$wallet.connected) await wallet.connect();
 		if (!$wallet.connected) return;
 
-		wallet;
-		wallet.approve(shipment.info.price);
+		const fee = await wallet.getTransferFee();
+		wallet.approve(shipment.info.price + fee);
 
-		// const error = await $wallet.actor.buyShipment(shipment.id);
+		const error = await $wallet.actor.buyShipment('Jacek', shipment.id);
+		console.log(error);
 
 		// if (error) {
 		// 	console.error(error);

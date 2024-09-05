@@ -7,7 +7,7 @@ use candid::Principal;
 use ic_cdk::{init, query, update};
 use icrc_ledger_types::icrc1::transfer::NumTokens;
 use models::{
-    customer::Customer,
+    customer::{self, Customer},
     shipment::{Shipment, ShipmentInfo, ShipmentLocation, SizeCategory},
     shipment_id::{ShipmentId, ShipmentIdInner},
 };
@@ -145,6 +145,14 @@ fn get_user_shipments() -> Vec<Shipment> {
     let customer_id = ic_cdk::caller();
 
     SHIPMENTS.with_borrow(|shipments| shipments.get_all_for_customer(&customer_id))
+}
+
+#[query()]
+fn roles() -> (bool, bool) {
+    let carrier = CARRIERS.with_borrow(|carriers| carriers.contains_key(&ic_cdk::caller()));
+    let customer = CUSTOMERS.with_borrow(|customers| customers.contains_key(&ic_cdk::caller()));
+
+    (carrier, customer)
 }
 
 #[cfg(test)]

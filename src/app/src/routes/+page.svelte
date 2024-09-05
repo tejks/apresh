@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { type Coords } from '$lib/common';
-	import { wallet } from '$lib/wallet';
+	import { wallet } from '$lib/wallet.svelte';
 	import Picker from '../components/Picker.svelte';
 
 	let greeting = $state('');

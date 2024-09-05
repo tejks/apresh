@@ -4,6 +4,7 @@ type Shipment = record {
   status : ShipmentStatus;
   customer : principal;
   info : ShipmentInfo;
+  name : text;
   created_at : nat64;
   carrier : opt principal;
 };
@@ -21,7 +22,9 @@ type SizeCategory = variant {
   Envelope;
 };
 service : () -> {
-  createShipment : (text, ShipmentInfo) -> (Result);
+  buyShipment : (text, nat64) -> (Result);
+  createShipment : (text, text, ShipmentInfo) -> (Result);
   listPendingShipments : () -> (vec Shipment) query;
   listUserShipments : () -> (vec Shipment) query;
+  roles : () -> (bool, bool) query;
 }
