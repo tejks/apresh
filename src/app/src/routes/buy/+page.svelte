@@ -14,7 +14,8 @@
 
 		console.log(balance);
 		console.log('idenity', $wallet.identity.getPrincipal().toString());
-		await wallet.approve(300n);
+		const fee = await wallet.getTransferFee();
+		await wallet.approve(200n + fee);
 
 		const error = await $wallet.actor.createShipment('Ja', {
 			destination: { lat: 0, lng: 0, street: '' },
