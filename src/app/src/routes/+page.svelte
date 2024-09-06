@@ -11,6 +11,8 @@
 	import type { PageData } from './$types';
 	import { anonymousBackend } from '$lib/canisters';
 	import { getLocalStorage } from '$lib/storage';
+	import Input from '../components/Input.svelte';
+	import TextInput from '../components/common/Inputs/TextInput.svelte';
 
 	onMount(async () => {
 		await wallet.connect();
@@ -41,6 +43,9 @@
 		const error = await $wallet.actor.buyShipment('Jacek', shipment.id);
 		console.log(error);
 
+		const errorMessage = await $wallet.actor.addEncryptedMessage(message, shipment.id);
+		console.log(errorMessage);
+
 		await invalidateAll();
 
 		selected = null;
@@ -62,6 +67,7 @@
 
 	let showBuyModal = $state(false);
 	let showAddModal = $state(false);
+	let message = $state('');
 	let selected = $state<Shipment | null>(null);
 
 	$effect(() => {
@@ -142,6 +148,8 @@
 			<ShipmentInfo shipment={selected} />
 		{/if}
 
+		<TextInput id ="Message" label="Message" name="Message"  bind:value={message}/>
+ 
 		<button
 			class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-7 py-2 w-1/2 mx-auto text-white text-base"
 			onclick={() => buy(selected!)}>Buy</button
