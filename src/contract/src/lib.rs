@@ -9,6 +9,7 @@ use ic_cdk::{init, query, update};
 use icrc_ledger_types::icrc1::transfer::NumTokens;
 use models::{
     customer::Customer,
+    qrcode::QrCodeOptions,
     shipment::{Shipment, ShipmentInfo, ShipmentLocation, SizeCategory},
     shipment_id::{ShipmentId, ShipmentIdInner},
 };
@@ -121,8 +122,7 @@ async fn finalize_shipment(shipment_id: ShipmentIdInner) -> Result<(), String> {
     match finalize_result {
         Ok(_) => Ok(transfer::transfer_out(transfer_out_carrier_args)
             .await
-            .map_err(|e| e.to_string())
-            .unwrap_or_else(|err| ic_cdk::trap(&err))),
+            .unwrap_or_else(|err| ic_cdk::trap(&err.to_string()))),
         Err(e) => Err(e.to_string()),
     }
 }
@@ -155,8 +155,7 @@ async fn buy_shipment(carrier_name: String, shipment_id: ShipmentIdInner) -> Res
     match buy_result {
         Ok(_) => Ok(transfer_in(transfer_in_args)
             .await
-            .map_err(|e| e.to_string())
-            .unwrap_or_else(|err| ic_cdk::trap(&err))),
+            .unwrap_or_else(|err| ic_cdk::trap(&err.to_string()))),
         Err(e) => Err(e.to_string()),
     }
 }
@@ -166,8 +165,9 @@ async fn create_shipment(
     customer_name: String,
     shipment_name: String,
     hashed_secret: String,
+    qr_options: QrCodeOptions,
     shipment_info: ShipmentInfo,
-) -> Result<(), String> {
+) -> Result<Vec<u8>, String> {
     let customer_id = ic_cdk::caller();
     check_anonymous(customer_id)?;
 
@@ -197,7 +197,9 @@ async fn create_shipment(
         SHIPMENTS.with_borrow_mut(|shipments| shipments.insert(inner_shipment_id, shipment));
     });
 
-    Ok(())
+    let qr_code = qr::generate(qr_options).unwrap_or_else(|err| ic_cdk::trap(&err.to_string()));
+
+    Ok(qr_code)
 }
 
 #[query(name = "listPendingShipments")]

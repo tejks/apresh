@@ -2,27 +2,23 @@ use image::{ImageBuffer, Rgba};
 use qrcode_generator::QrCodeEcc;
 use std::io::Cursor;
 
+use crate::models::qrcode::QrCodeOptions;
 /// Generates a QR code image in PNG format for the given input text.
 /// The requested image size should be specified in pixels.
-pub(super) fn generate(
-    input: String,
-    gradient: bool,
-    transparent: bool,
-    image_size: usize,
-) -> Result<Vec<u8>, anyhow::Error> {
+pub(super) fn generate(options: QrCodeOptions) -> Result<Vec<u8>, anyhow::Error> {
     // Generate a QR code image that can tolerate 25% of erroneous codewords.
     let mut qr = image::DynamicImage::ImageLuma8(qrcode_generator::to_image_buffer(
-        input,
+        options.link,
         QrCodeEcc::Quartile,
-        image_size,
+        options.size,
     )?)
     .into_rgba8();
 
-    if gradient {
+    if options.gradient {
         add_gradient(&mut qr);
     }
 
-    if transparent {
+    if options.transparent {
         make_transparent(&mut qr);
     }
 
@@ -39,7 +35,6 @@ fn make_transparent(qr: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
         }
     }
 }
-
 
 /// Adds a color gradient to the black squares of the QR code image.
 /// The gradient goes from the center of the image to its sides.
@@ -68,33 +63,4 @@ fn add_gradient(qr: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
             *pixel = image::Rgba(rgba);
         }
     }
-}
-
-/// Given a QR code image, this function returns the size of the smallest black
-/// square by inspecting the special element in the top-left part of the image.
-fn get_qr_element_size(qr: &ImageBuffer<Rgba<u8>, Vec<u8>>) -> usize {
-    const BLACK_PIXEL: [u8; 4] = [0, 0, 0, 255];
-
-    let size = qr.width().min(qr.height());
-
-    // Find the first black pixel by traversing the image diagonally starting
-    // from the top-left corner.
-    let mut start = size;
-    for i in 0..size {
-        if qr.get_pixel(i, i).0 == BLACK_PIXEL {
-            start = i;
-            break;
-        }
-    }
-
-    // Continue the diagonal traversal until the color switches.
-    let mut element_size = 1;
-    for i in 0..size - start {
-        if qr.get_pixel(start + i, start + i).0 != BLACK_PIXEL {
-            element_size = i;
-            break;
-        }
-    }
-
-    element_size as usize
 }
