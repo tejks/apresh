@@ -9,6 +9,7 @@
 	import Modal from '../components/Modal.svelte';
 	import ShipmentInfo from '../components/ShipmentInfo.svelte';
 	import type { PageData } from './$types';
+	import { anonymousBackend } from '$lib/canisters';
 
 	onMount(async () => {
 		await wallet.connect();
@@ -49,7 +50,7 @@
 		if (!$wallet.connected) await wallet.connect();
 		if (!$wallet.connected) return;
 
-		const error = await $wallet.actor.finalizeShipment(shipment.id);
+		const error = await $wallet.actor.finalizeShipment(shipment.id, []);
 		console.log(error);
 
 		await invalidateAll();
@@ -61,6 +62,11 @@
 	let showBuyModal = $state(false);
 	let showAddModal = $state(false);
 	let selected = $state<Shipment | null>(null);
+
+	$effect(() => {
+		if (!data.settleId || !data.settleSecret) return;
+		anonymousBackend.finalizeShipment(BigInt(data.settleId), [data.settleSecret]);
+	});
 </script>
 
 <CreateShipmentForm showModal={showAddModal} onClose={() => (showAddModal = false)} />

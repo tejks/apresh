@@ -5,7 +5,7 @@ type QrCodeOptions = record {
   size : nat64;
 };
 type Result = variant { Ok; Err : text };
-type Result_1 = variant { Ok : blob; Err : text };
+type Result_1 = variant { Ok : record { blob; nat64 }; Err : text };
 type Shipment = record {
   id : nat64;
   status : ShipmentStatus;
