@@ -3,12 +3,12 @@
 	import { type Coords } from '$lib/common';
 	import { wallet } from '$lib/wallet.svelte';
 	import type { Shipment } from '../../../declarations/contract/contract.did';
+	import Button from '../components/Button.svelte';
+	import Marker from '../components/Marker.svelte';
 	import Modal from '../components/Modal.svelte';
 	import Picker from '../components/Picker.svelte';
 	import ShipmentInfo from '../components/ShipmentInfo.svelte';
 	import type { PageData } from './$types';
-	import Button from '../components/Button.svelte';
-	import Marker from '../components/Marker.svelte';
 
 	const {
 		data
