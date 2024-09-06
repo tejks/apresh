@@ -1,16 +1,15 @@
-use ic_cdk::export::candid::CandidType;
-use ic_cdk::export::serde::Deserialize;
-use ic_cdk::export::Principal;
+use candid::{CandidType, Principal};
+use serde::Deserialize;
 
 pub type CanisterId = Principal;
 
-#[derive(CandidType, Deserialize, Eq, PartialEq)]
+#[derive(CandidType, Deserialize)]
 pub enum VetKDCurve {
     #[serde(rename = "bls12_381")]
     Bls12_381,
 }
 
-#[derive(CandidType, Deserialize, Eq, PartialEq)]
+#[derive(CandidType, Deserialize)]
 pub struct VetKDKeyId {
     pub curve: VetKDCurve,
     pub name: String,
@@ -23,7 +22,7 @@ pub struct VetKDPublicKeyRequest {
     pub key_id: VetKDKeyId,
 }
 
-#[derive(CandidType)]
+#[derive(CandidType, Deserialize)]
 pub struct VetKDPublicKeyReply {
     pub public_key: Vec<u8>,
 }
@@ -36,7 +35,7 @@ pub struct VetKDEncryptedKeyRequest {
     pub encryption_public_key: Vec<u8>,
 }
 
-#[derive(CandidType)]
+#[derive(CandidType, Deserialize)]
 pub struct VetKDEncryptedKeyReply {
     pub encrypted_key: Vec<u8>,
 }

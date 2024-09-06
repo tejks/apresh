@@ -1,9 +1,10 @@
 {
   "canisters": {
     "system_api": {
-      "candid": "src/system_api/vetkd_system_api.did",
-      "package": "vetkd_system_api",
-      "type": "rust",
+      "wasm": "vetkd/vetkd_system_api.wasm",
+      "candid": "vetkd/vetkd_system_api.did",
+      "frontend": {},
+      "type": "custom",
       "specified_id": "s55qq-oqaaa-aaaaa-aaakq-cai"
     },
     "icrc1_ledger_canister": {
@@ -29,6 +30,7 @@
       "declarations": {
         "node_compatibility": true
       },
+      "dependencies": ["system_api"],
       "package": "contract",
       "type": "custom",
       "build": "./build.sh contract",

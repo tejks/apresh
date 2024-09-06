@@ -1,6 +1,5 @@
 [workspace]
 members = [
     "src/contract",
-    "src/system-api",
 ]
 resolver = "2"
