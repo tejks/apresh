@@ -1,17 +1,15 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
-	import { type Coords } from '$lib/common';
 	import { wallet } from '$lib/wallet.svelte';
+	import { Plus } from 'lucide-svelte';
+	import { onMount } from 'svelte';
 	import type { Shipment } from '../../../declarations/contract/contract.did';
+	import Button from '../components/Button.svelte';
+	import CreateShipmentForm from '../components/CreateShipment.svelte';
+	import Marker from '../components/Marker.svelte';
 	import Modal from '../components/Modal.svelte';
-	import Picker from '../components/Picker.svelte';
 	import ShipmentInfo from '../components/ShipmentInfo.svelte';
 	import type { PageData } from './$types';
-	import Button from '../components/Button.svelte';
-	import Marker from '../components/Marker.svelte';
-	import { onMount } from 'svelte';
-	import CreateShipmentForm from '../components/CreateShipment.svelte';
-	import { Plus } from 'lucide-svelte';
 
 	onMount(async () => {
 		await wallet.connect();
@@ -24,13 +22,6 @@
 	}: {
 		data: PageData;
 	} = $props();
-
-	let greeting = $state('');
-	let name = $state('');
-
-	function onLocationChange(coords: Coords) {
-		console.log(coords);
-	}
 
 	let showModal = $state(true);
 
@@ -75,10 +66,6 @@
 	let showAddModal = $state(false);
 	let selected = $state<Shipment | null>(null);
 </script>
-
-{#if showModal}
-	<Picker name="From" picked={onLocationChange} />
-{/if}
 
 <CreateShipmentForm showModal={showAddModal} onClose={() => (showAddModal = false)} />
 
