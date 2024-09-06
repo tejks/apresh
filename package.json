@@ -15,7 +15,5 @@
   "workspaces": [
     "src/app"
   ],
-  "dependencies": {
-    "svelte-maplibre": "^0.9.13"
-  }
+  "dependencies": {}
 }

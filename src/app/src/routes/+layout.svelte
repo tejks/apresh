@@ -1,6 +1,6 @@
 <script>
 	import { defaultLocation } from '$lib/common';
-	import { GeolocateControl, MapLibre } from 'svelte-maplibre';
+	import { MapLibre } from 'svelte-maplibre';
 	import Header from '../components/common/Header.svelte';
 	import '../styles.scss';
 </script>
@@ -14,12 +14,6 @@
 		zoom={15}
 		center={defaultLocation}
 	>
-		<GeolocateControl
-			position="top-left"
-			fitBoundsOptions={{ maxZoom: 12 }}
-			showAccuracyCircle={false}
-		/>
-
 		<slot />
 	</MapLibre>
 </main>

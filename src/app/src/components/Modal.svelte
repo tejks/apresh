@@ -1,9 +1,10 @@
 <script lang="ts">
 	interface IProps {
 		showModal: boolean;
+		onClose: () => void;
 	}
 
-	let { showModal = $bindable() }: IProps = $props();
+	let { showModal = $bindable(), onClose }: IProps = $props();
 
 	let dialog: HTMLDialogElement;
 
@@ -15,15 +16,15 @@
 
 <dialog
 	bind:this={dialog}
-	class="rounded-3xl w-1/4 h-1/2"
-	on:close={() => (showModal = false)}
+	class="rounded-3xl w-[500px]"
+	on:close={onClose}
 	on:click|self={() => dialog.close()}
 >
 	<div
 		on:click|stopPropagation
 		class="flex mx-auto bg-gradient-to-tr from-blue-500 via-orange-400 to-rose-400 p-1 h-full rounded-3xl"
 	>
-		<div class="flex-1 bg-white rounded-3xl flex justify-center items-center">
+		<div class="flex-1 bg-white rounded-3xl flex justify-center items-center py-10 px-16">
 			<slot name="header" />
 			<hr />
 			<slot />

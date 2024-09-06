@@ -1,5 +1,6 @@
 <script lang="ts">
 	import clsx from 'clsx';
+	import InputWrapper from './InputWrapper.svelte';
 
 	interface DecimalInputProps {
 		class?: string;
@@ -8,15 +9,19 @@
 		required?: boolean;
 		name: string;
 		className?: string;
+		id: string;
+		label: string;
 	}
 
 	let {
 		class: className,
 		placeholder,
-		value,
+		value = $bindable(),
 		required,
 		name,
-		className: cls
+		className: cls,
+		id,
+		label
 	}: DecimalInputProps = $props();
 
 	function onKeyDown(event: KeyboardEvent) {
@@ -30,7 +35,6 @@
 			event.preventDefault();
 		}
 
-		// Allow only one decimal separator
 		if (
 			isDecimalSeparator &&
 			(value?.toString().includes('.') || value?.toString().includes(','))
@@ -40,19 +44,22 @@
 	}
 </script>
 
-<div class="rounded-lg border-2 border-gradient-to-r from-primary to-secondary">
-	<input
-		class={clsx(
-			'w-full rounded-3xl bg-transparent px-3 py-2 text-sm text-neutral-600 font-normal placeholder-primary placeholder:italic placeholder:text-slate-400 lg:px-4 lg:py-2 lg:text-base',
-			className
-		)}
-		{name}
-		autocomplete="off"
-		onkeydown={onKeyDown}
-		type="text"
-		bind:value
-		{placeholder}
-		pattern="^[0-9]*[.,]?[0-9]$"
-		{required}
-	/>
-</div>
+<InputWrapper {label} {id}>
+	<div class="rounded-lg border-2 border-gradient-to-r from-primary to-secondary">
+		<input
+			class={clsx(
+				'w-full rounded-3xl bg-transparent px-2 py-2 text-sm text-neutral-600 font-normal placeholder-primary placeholder:italic placeholder:text-slate-400 lg:px-4 lg:py-2 lg:text-base focus:outline-none',
+				className
+			)}
+			{name}
+			autocomplete="off"
+			onkeydown={onKeyDown}
+			type="text"
+			bind:value
+			{placeholder}
+			{id}
+			pattern="^[0-9]*[.,]?[0-9]$"
+			{required}
+		/>
+	</div>
+</InputWrapper>
