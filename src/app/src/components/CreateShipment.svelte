@@ -5,6 +5,8 @@
 	import Modal from './Modal.svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { wallet } from '$lib/wallet.svelte';
+	import { getLocalStorage, setLocalStorage } from '$lib/storage';
+	import { sha256 } from 'js-sha256';
 
 	interface ShipmentProps {
 		showModal: boolean;
@@ -34,7 +36,13 @@
 		const priceBigint = BigInt(price);
 
 		const appRes = await wallet.approve(priceBigint);
-		const res = await $wallet.actor.createShipment('', '', {
+		const secret = 'secret';
+
+		const hash = sha256.create();
+		hash.update(secret);
+		const hashed = hash.hex();
+
+		const res = await $wallet.actor.createShipment('', '', hashed, {
 			size_category:
 				size_category == 'Parcel'
 					? {
@@ -50,6 +58,13 @@
 			price: priceBigint,
 			value: BigInt(value)
 		});
+
+		if (Object.keys(res)[0] === 'Ok') {
+			const id: bigint = (res as { Ok: bigint }).Ok;
+			setLocalStorage(id.toString(), secret);
+			const loadedDone = getLocalStorage('done', secret);
+			console.log('loadedDone', loadedDone);
+		}
 
 		console.log('createShipment', appRes, res);
 

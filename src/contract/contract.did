@@ -1,4 +1,5 @@
 type Result = variant { Ok; Err : text };
+type Result_1 = variant { Ok : nat64; Err : text };
 type Shipment = record {
   id : nat64;
   status : ShipmentStatus;
@@ -6,6 +7,7 @@ type Shipment = record {
   info : ShipmentInfo;
   name : text;
   created_at : nat64;
+  hashed_secret : text;
   carrier : opt principal;
 };
 type ShipmentInfo = record {
@@ -23,7 +25,7 @@ type SizeCategory = variant {
 };
 service : () -> {
   buyShipment : (text, nat64) -> (Result);
-  createShipment : (text, text, ShipmentInfo) -> (Result);
+  createShipment : (text, text, text, ShipmentInfo) -> (Result_1);
   finalizeShipment : (nat64) -> (Result);
   listPendingShipments : () -> (vec Shipment) query;
   listUserShipments : () -> (vec Shipment, vec Shipment) query;

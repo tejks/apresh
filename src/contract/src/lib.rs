@@ -167,7 +167,7 @@ async fn create_shipment(
     shipment_name: String,
     hashed_secret: String,
     shipment_info: ShipmentInfo,
-) -> Result<(), String> {
+) -> Result<u64, String> {
     let customer_id = ic_cdk::caller();
     check_anonymous(customer_id)?;
 
@@ -183,7 +183,7 @@ async fn create_shipment(
         .await
         .map_err(|e| e.to_string())?;
 
-    CUSTOMERS.with_borrow_mut(|customers| {
+    let shipment_id = CUSTOMERS.with_borrow_mut(|customers| {
         let customer = customers.get_or_create(customer_name, customer_id);
         let shipment_id = ShipmentId::new();
         let inner_shipment_id = shipment_id.into_inner();
@@ -195,9 +195,11 @@ async fn create_shipment(
             shipment_info,
         );
         SHIPMENTS.with_borrow_mut(|shipments| shipments.insert(inner_shipment_id, shipment));
+
+        inner_shipment_id
     });
 
-    Ok(())
+    Ok(shipment_id)
 }
 
 #[query(name = "listPendingShipments")]
