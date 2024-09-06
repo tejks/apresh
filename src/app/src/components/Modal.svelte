@@ -1,10 +1,13 @@
 <script lang="ts">
+	import clsx from 'clsx';
+
 	interface IProps {
 		showModal: boolean;
 		onClose: () => void;
+		cls?: string;
 	}
 
-	let { showModal = $bindable(), onClose }: IProps = $props();
+	let { showModal = $bindable(), onClose, cls }: IProps = $props();
 
 	let dialog: HTMLDialogElement;
 
@@ -16,7 +19,7 @@
 
 <dialog
 	bind:this={dialog}
-	class="rounded-3xl w-[500px]"
+	class={clsx('rounded-3xl w-[550px]', cls)}
 	on:close={onClose}
 	on:click|self={() => dialog.close()}
 >
@@ -24,7 +27,7 @@
 		on:click|stopPropagation
 		class="flex mx-auto bg-gradient-to-tr from-blue-500 via-orange-400 to-rose-400 p-1 h-full rounded-3xl"
 	>
-		<div class="flex-1 bg-white rounded-3xl flex flex-col justify-center items-center py-10 px-16">
+		<div class="flex-1 bg-white rounded-3xl flex flex-col justify-center items-center py-14 px-24">
 			<slot name="header" />
 			<hr />
 			<slot />

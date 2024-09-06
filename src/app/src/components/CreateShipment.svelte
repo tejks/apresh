@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
-	import { wallet } from '$lib/wallet.svelte';
 	import { getLocalStorage, setLocalStorage } from '$lib/storage';
+	import { wallet } from '$lib/wallet.svelte';
 	import { sha256 } from 'js-sha256';
 	import { MapEvents, Marker } from 'svelte-maplibre';
 	import DecimalInput from './common/Inputs/DecimalInput.svelte';
@@ -147,7 +147,7 @@
 					<span>Source</span>
 					{#if !source.street}
 						<button
-							class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-4 py-1 mx-auto text-white"
+							class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-4 py-1 mx-auto text-white transition ease-in-out hover:-translate-y-0.5 hover:scale-105 duration-200"
 							onclick={selectSource}>Select location</button
 						>
 					{:else}
@@ -160,7 +160,7 @@
 					<span>Destination</span>
 					{#if !destination.street}
 						<button
-							class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-4 py-1 mx-auto text-white"
+							class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-4 py-1 mx-auto text-white transition ease-in-out hover:-translate-y-0.5 hover:scale-105 duration-200"
 							onclick={selectDestination}>Select location</button
 						>
 					{:else}
@@ -212,7 +212,7 @@
 
 			<button
 				type="submit"
-				class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-7 py-2 w-1/2 mx-auto text-white text-base"
+				class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-7 py-2 w-3/5 mx-auto text-white text-base transition ease-in-out hover:-translate-y-0.5 hover:scale-105 duration-200"
 				>Create Shipment</button
 			>
 		</form>

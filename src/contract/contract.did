@@ -6,6 +6,7 @@ type QrCodeOptions = record {
 };
 type Result = variant { Ok; Err : text };
 type Result_1 = variant { Ok : record { blob; nat64 }; Err : text };
+type Result_2 = variant { Ok : blob; Err : text };
 type Shipment = record {
   id : nat64;
   status : ShipmentStatus;
@@ -35,6 +36,7 @@ service : () -> {
       Result_1,
     );
   finalizeShipment : (nat64, opt text) -> (Result);
+  generateQr : (text, nat64) -> (Result_2) query;
   listPendingShipments : () -> (vec Shipment) query;
   listUserShipments : () -> (vec Shipment, vec Shipment) query;
   roles : () -> (bool, bool) query;
