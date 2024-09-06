@@ -85,7 +85,11 @@ fn init() {
 }
 
 #[update(name = "finalizeShipment")]
-async fn finalize_shipment(shipment_id: ShipmentIdInner) -> Result<(), String> {
+async fn finalize_shipment(
+    shipment_id: ShipmentIdInner,
+    secret_key: Option<String>,
+) -> Result<(), String> {
+    let caller = ic_cdk::caller();
     let (finalize_result, carrier, value, price) = SHIPMENTS
         .with_borrow_mut(|shipments| {
             let shipment = shipments
@@ -99,11 +103,11 @@ async fn finalize_shipment(shipment_id: ShipmentIdInner) -> Result<(), String> {
 
                 CARRIERS.with_borrow_mut(|carriers| {
                     let carrier = carriers
-                        .get_mut(&shipment.carrier_id().ok_or(anyhow!("Carrier not found"))?)
-                        .ok_or(anyhow!("Customer not found"))?;
+                        .get_mut(&shipment.carrier_id().ok_or(anyhow!("Carrier not set"))?)
+                        .ok_or(anyhow!("Carrier not found"))?;
 
                     Ok((
-                        shipment.finalize(carrier, customer),
+                        shipment.finalize(carrier, customer, secret_key, caller),
                         carrier.id(),
                         shipment.info().value(),
                         shipment.info().price(),

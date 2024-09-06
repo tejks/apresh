@@ -1,6 +1,12 @@
+use std::io::SeekFrom;
+
 use super::{carrier::Carrier, customer::Customer, shipment_id::ShipmentIdInner};
+use anyhow::Context;
 use candid::{CandidType, Principal};
+use hex::FromHex;
+use hex_literal::hex;
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256, Sha512};
 
 #[derive(Deserialize, Serialize, Debug, Clone, CandidType)]
 pub enum SizeCategory {
@@ -106,13 +112,35 @@ impl Shipment {
         shipment
     }
 
+    fn validate_secret(&self, secret: Option<String>) -> anyhow::Result<()> {
+        let secret = secret.ok_or(anyhow::anyhow!("missing secret"))?;
+        let hex = Vec::from_hex(secret.clone()).context("invalid hex")?;
+
+        let mut hasher = Sha256::new();
+        hasher.update(secret);
+        let result = hasher.finalize();
+
+        if result[..] == hex {
+            return Ok(());
+        } else {
+            return Err(anyhow::anyhow!("secret verification failed"));
+        }
+    }
+
     pub fn finalize(
         &mut self,
         carrier: &mut Carrier,
         customer: &mut Customer,
+        secret_key: Option<String>,
+        caller: Principal,
     ) -> anyhow::Result<()> {
         if self.status != ShipmentStatus::InTransit {
             return Err(anyhow::anyhow!("shipment is not ready to be finalized"));
+        }
+
+        match caller == self.customer { 
+            true => {}
+            false => self.validate_secret(secret_key)?,
         }
 
         self.status = ShipmentStatus::Delivered;
@@ -131,7 +159,6 @@ impl Shipment {
         self.carrier = Some(carrier.id());
         self.status = ShipmentStatus::InTransit;
 
-        
         carrier.add_shipment(self.id());
 
         Ok(())
