@@ -1,4 +1,11 @@
+type QrCodeOptions = record {
+  transparent : bool;
+  gradient : bool;
+  link : text;
+  size : nat64;
+};
 type Result = variant { Ok; Err : text };
+type Result_1 = variant { Ok : blob; Err : text };
 type Shipment = record {
   id : nat64;
   status : ShipmentStatus;
@@ -6,6 +13,7 @@ type Shipment = record {
   info : ShipmentInfo;
   name : text;
   created_at : nat64;
+  hashed_secret : text;
   carrier : opt principal;
 };
 type ShipmentInfo = record {
@@ -23,8 +31,10 @@ type SizeCategory = variant {
 };
 service : () -> {
   buyShipment : (text, nat64) -> (Result);
-  createShipment : (text, text, ShipmentInfo) -> (Result);
-  finalizeShipment : (nat64) -> (Result);
+  createShipment : (text, text, text, QrCodeOptions, ShipmentInfo) -> (
+      Result_1,
+    );
+  finalizeShipment : (nat64, opt text) -> (Result);
   listPendingShipments : () -> (vec Shipment) query;
   listUserShipments : () -> (vec Shipment, vec Shipment) query;
   roles : () -> (bool, bool) query;
