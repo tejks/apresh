@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { anonymousBackend } from '$lib/canisters';
-	import { MapEvents, Marker } from 'svelte-maplibre';
-	import DecimalInput from './common/Inputs/DecimalInput.svelte';
-	import Modal from './Modal.svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { wallet } from '$lib/wallet.svelte';
 	import { getLocalStorage, setLocalStorage } from '$lib/storage';
 	import { sha256 } from 'js-sha256';
+	import { MapEvents, Marker } from 'svelte-maplibre';
+	import DecimalInput from './common/Inputs/DecimalInput.svelte';
+	import TextInput from './common/Inputs/TextInput.svelte';
+	import Modal from './Modal.svelte';
 
 	interface ShipmentProps {
 		showModal: boolean;
@@ -23,6 +23,7 @@
 	let max_width = $state(0);
 	let max_depth = $state(0);
 	let price = $state(0);
+	let name = $state('');
 
 	let isSelectMode = $state(false);
 	let selectModeType: 'source' | 'destination' = $state('source');
@@ -42,7 +43,7 @@
 		hash.update(secret);
 		const hashed = hash.hex();
 
-		const res = await $wallet.actor.createShipment('', '', hashed, {
+		const res = await $wallet.actor.createShipment('', name, hashed, {
 			size_category:
 				size_category == 'Parcel'
 					? {
@@ -69,7 +70,6 @@
 		console.log('createShipment', appRes, res);
 
 		onClose();
-
 		invalidateAll();
 	};
 
@@ -106,6 +106,7 @@
 		max_width = 0;
 		max_depth = 0;
 		price = 0;
+		name = '';
 	}
 </script>
 
@@ -126,6 +127,7 @@
 				Create shipment
 			</h1>
 
+			<TextInput label="Name" id="name" name="name" bind:value={name} required />
 			<DecimalInput label="Value" id="value" name="value" bind:value required />
 			<DecimalInput label="Price" id="price" name="price" bind:value={price} required />
 
@@ -175,21 +177,21 @@
 
 			{#if size_category === 'Parcel'}
 				<DecimalInput
-					label="Max Height"
+					label="Height"
 					id="max_height"
 					name="max_height"
 					bind:value={max_height}
 					required
 				/>
 				<DecimalInput
-					label="Max Width"
+					label="Width"
 					id="max_width"
 					name="max_width"
 					bind:value={max_width}
 					required
 				/>
 				<DecimalInput
-					label="Max Depth"
+					label="Depth"
 					id="max_depth"
 					name="max_depth"
 					bind:value={max_depth}
