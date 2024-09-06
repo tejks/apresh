@@ -164,6 +164,17 @@ async fn buy_shipment(carrier_name: String, shipment_id: ShipmentIdInner) -> Res
     }
 }
 
+#[query(name = "generateQr")]
+async fn generate_qr(link: String, size: usize) -> Result<Vec<u8>, String> {
+    qr::generate(QrCodeOptions {
+        gradient: false,
+        link,
+        size,
+        transparent: false,
+    })
+    .map_err(|e| e.to_string())
+}
+
 #[update(name = "createShipment")]
 async fn create_shipment(
     customer_name: String,
