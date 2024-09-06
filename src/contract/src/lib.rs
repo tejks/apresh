@@ -171,7 +171,7 @@ async fn create_shipment(
     hashed_secret: String,
     qr_options: QrCodeOptions,
     shipment_info: ShipmentInfo,
-) -> Result<Vec<u8>, String> {
+) -> Result<(Vec<u8>, ShipmentIdInner), String> {
     let customer_id = ic_cdk::caller();
     check_anonymous(customer_id)?;
 
@@ -187,7 +187,7 @@ async fn create_shipment(
         .await
         .map_err(|e| e.to_string())?;
 
-    CUSTOMERS.with_borrow_mut(|customers| {
+    let shipment_id = CUSTOMERS.with_borrow_mut(|customers| {
         let customer = customers.get_or_create(customer_name, customer_id);
         let shipment_id = ShipmentId::new();
         let inner_shipment_id = shipment_id.into_inner();
@@ -199,11 +199,12 @@ async fn create_shipment(
             shipment_info,
         );
         SHIPMENTS.with_borrow_mut(|shipments| shipments.insert(inner_shipment_id, shipment));
+        inner_shipment_id
     });
 
     let qr_code = qr::generate(qr_options).unwrap_or_else(|err| ic_cdk::trap(&err.to_string()));
 
-    Ok(qr_code)
+    Ok((qr_code, shipment_id))
 }
 
 #[query(name = "listPendingShipments")]
