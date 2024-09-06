@@ -114,10 +114,10 @@ impl Shipment {
 
     fn validate_secret(&self, secret: Option<String>) -> anyhow::Result<()> {
         let secret = secret.ok_or(anyhow::anyhow!("missing secret"))?;
-        let hex = Vec::from_hex(secret.clone()).context("invalid hex")?;
+        let hex = Vec::from_hex(self.hashed_secret.clone()).context("invalid hex")?;
 
         let mut hasher = Sha256::new();
-        hasher.update(secret);
+        hasher.update(secret); 
         let result = hasher.finalize();
 
         if result[..] == hex {
@@ -184,3 +184,31 @@ impl Shipment {
         &self.info
     }
 }
+
+// works, but cannot be used in tests, beacuse of icp code
+// #[cfg(test)]
+// mod hash_verify_test {
+//     use super::*;
+
+//     #[test]
+//     fn test_hash_verify() {
+//         let secret = "secret";
+//         let hex =  "2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b";
+
+//         let shipment = Shipment::create(
+//             &mut Customer::new(Principal::anonymous(), "Jacek".to_string()),
+//             ShipmentIdInner::default(),
+//             hex.to_string(),
+//             "name".to_string(),
+//             ShipmentInfo::new(
+//                 0,
+//                 0,
+//                 ShipmentLocation::new("street".to_string(), 0.0, 0.0),
+//                 ShipmentLocation::new("street".to_string(), 0.0, 0.0),
+//                 SizeCategory::Envelope,
+//             ),
+//         );
+
+//         assert!(shipment.validate_secret(Some(secret.to_string())).is_ok());
+//     }
+// }
