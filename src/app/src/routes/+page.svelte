@@ -13,6 +13,8 @@
 	import { getLocalStorage } from '$lib/storage';
 	import Input from '../components/Input.svelte';
 	import TextInput from '../components/common/Inputs/TextInput.svelte';
+	import { Principal } from '@dfinity/principal';
+	import * as vetkd from 'ic-vetkd-utils';
 
 	onMount(async () => {
 		await wallet.connect();
@@ -33,6 +35,30 @@
 		showBuyModal = true;
 	}
 
+	const hex_decode = (hexString: string) =>
+		Uint8Array.from(hexString.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16)));
+
+	const hex_encode = (bytes: Uint8Array) =>
+		bytes.reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), '');
+
+	async function ibe_encrypt(message: string, principal: Principal) {
+		if (!$wallet.connected) await wallet.connect();
+		if (!$wallet.connected) return;
+
+		const pk_bytes_hex = await $wallet.actor.ibe_encryption_key();
+		const message_encoded = new TextEncoder().encode(message);
+		const seed = window.crypto.getRandomValues(new Uint8Array(32));
+
+		const ibe_ciphertext = vetkd.IBECiphertext.encrypt(
+			hex_decode(pk_bytes_hex),
+			principal.toUint8Array(),
+			message_encoded,
+			seed
+		);
+
+		return hex_encode(ibe_ciphertext.serialize());
+	}
+
 	async function buy(shipment: Shipment) {
 		if (!$wallet.connected) await wallet.connect();
 		if (!$wallet.connected) return;
@@ -43,7 +69,8 @@
 		const error = await $wallet.actor.buyShipment('Jacek', shipment.id);
 		console.log(error);
 
-		const errorMessage = await $wallet.actor.addEncryptedMessage(message, shipment.id);
+		const encryptedMessage = await ibe_encrypt(message, shipment.customer);
+		const errorMessage = await $wallet.actor.addEncryptedMessage(encryptedMessage!, shipment.id);
 		console.log(errorMessage);
 
 		await invalidateAll();
@@ -148,8 +175,8 @@
 			<ShipmentInfo shipment={selected} />
 		{/if}
 
-		<TextInput id ="Message" label="Message" name="Message"  bind:value={message}/>
- 
+		<TextInput id="Message" label="Message" name="Message" bind:value={message} />
+
 		<button
 			class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-7 py-2 w-1/2 mx-auto text-white text-base"
 			onclick={() => buy(selected!)}>Buy</button
