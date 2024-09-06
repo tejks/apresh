@@ -26,7 +26,7 @@
 	const createShipment = async (e: Event) => {
 		e.preventDefault();
 
-		await anonymousBackend.createShipment('', {
+		await anonymousBackend.createShipment('', '', {
 			size_category:
 				size_category == 'Parcel'
 					? {

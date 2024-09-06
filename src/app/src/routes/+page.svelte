@@ -63,7 +63,7 @@
 	<Marker onClick={() => selectShipment(id)} location={info.source} name={id}></Marker>
 {/each}
 
-<Modal bind:showModal={showBuyModal}>
+<Modal bind:showModal={showBuyModal} onClose={() => (showBuyModal = false)}>
 	{#if selected}
 		<ShipmentInfo shipment={selected} />
 	{/if}
