@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { anonymousBackend } from '$lib/canisters';
+	import { invalidateAll } from '$app/navigation';
+	import { wallet } from '$lib/wallet.svelte';
 	import { MapEvents, Marker } from 'svelte-maplibre';
 	import DecimalInput from './common/Inputs/DecimalInput.svelte';
 	import Modal from './Modal.svelte';
-	import { invalidateAll } from '$app/navigation';
-	import { wallet } from '$lib/wallet.svelte';
 
 	interface ShipmentProps {
 		showModal: boolean;
@@ -160,21 +159,21 @@
 
 			{#if size_category === 'Parcel'}
 				<DecimalInput
-					label="Max Height"
+					label="Height"
 					id="max_height"
 					name="max_height"
 					bind:value={max_height}
 					required
 				/>
 				<DecimalInput
-					label="Max Width"
+					label="Width"
 					id="max_width"
 					name="max_width"
 					bind:value={max_width}
 					required
 				/>
 				<DecimalInput
-					label="Max Depth"
+					label="Depth"
 					id="max_depth"
 					name="max_depth"
 					bind:value={max_depth}
