@@ -4,7 +4,6 @@
 	import { Plus } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import type { Shipment } from '../../../declarations/contract/contract.did';
-	import Button from '../components/Button.svelte';
 	import CreateShipmentForm from '../components/CreateShipment.svelte';
 	import Marker from '../components/Marker.svelte';
 	import Modal from '../components/Modal.svelte';
@@ -13,7 +12,6 @@
 
 	onMount(async () => {
 		await wallet.connect();
-
 		await invalidateAll();
 	});
 
@@ -22,8 +20,6 @@
 	}: {
 		data: PageData;
 	} = $props();
-
-	let showModal = $state(true);
 
 	function selectShipment(id: bigint) {
 		selected =
@@ -79,17 +75,21 @@
 			<ShipmentInfo shipment={selected} />
 		{/if}
 
-		<Button onClick={() => settle(selected!)}>Settle</Button>
+		<button
+			class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-7 py-2 w-1/2 mx-auto text-white text-base"
+			onclick={() => settle(selected!)}>Settle</button
+		>
 	</Modal>
 
 	<div class="absolute bottom-16 right-16 z-50">
-		<CreateShipmentForm {showModal} onClose={() => (showModal = false)} />
-
 		<div
 			class="flex rounded-full mx-auto bg-gradient-to-tr from-blue-500 via-orange-400 to-rose-400 p-0.5 shadow-lg transition ease-in-out hover:-translate-y-0.5 hover:scale-105 duration-200"
 		>
 			<button
-				onclick={() => (showModal = true)}
+				onclick={() => {
+					if (!$wallet.connected) wallet.connect();
+					showAddModal = true;
+				}}
 				class="rounded-full w-20 h-20 bg-white flex justify-center items-center"
 			>
 				<Plus size={55} class="stroke-orange-400" />
@@ -105,8 +105,6 @@
 		{#if selected}
 			<ShipmentInfo shipment={selected} />
 		{/if}
-
-		<!-- <Button onClick={() => cancel(selected!)}>Settle</Button> -->
 	</Modal>
 {:else}
 	{#each data.shipments as { id, info }}
@@ -118,17 +116,21 @@
 			<ShipmentInfo shipment={selected} />
 		{/if}
 
-		<Button onClick={() => buy(selected!)}>Buy</Button>
+		<button
+			class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-7 py-2 w-1/2 mx-auto text-white text-base"
+			onclick={() => buy(selected!)}>Buy</button
+		>
 	</Modal>
 
 	<div class="absolute bottom-16 right-16 z-50">
-		<CreateShipmentForm {showModal} onClose={() => (showModal = false)} />
-
 		<div
 			class="flex rounded-full mx-auto bg-gradient-to-tr from-blue-500 via-orange-400 to-rose-400 p-0.5 shadow-lg transition ease-in-out hover:-translate-y-0.5 hover:scale-105 duration-200"
 		>
 			<button
-				onclick={() => (showModal = true)}
+				onclick={() => {
+					if (!$wallet.connected) wallet.connect();
+					showAddModal = true;
+				}}
 				class="rounded-full w-20 h-20 bg-white flex justify-center items-center"
 			>
 				<Plus size={55} class="stroke-orange-400" />
