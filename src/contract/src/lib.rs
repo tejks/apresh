@@ -155,9 +155,10 @@ async fn buy_shipment(carrier_name: String, shipment_id: ShipmentIdInner) -> Res
     };
 
     match buy_result {
-        Ok(_) => transfer_in(transfer_in_args)
+        Ok(_) => Ok(transfer_in(transfer_in_args)
             .await
-            .map_err(|e| e.to_string()),
+            .map_err(|e| e.to_string())
+            .unwrap()),
         Err(e) => Err(e.to_string()),
     }
 }
@@ -208,7 +209,7 @@ fn get_user_shipments() -> (Vec<Shipment>, Vec<Shipment>) {
     (shippers, customers)
 }
 
-#[query()]
+#[query]
 fn roles() -> (bool, bool) {
     let carrier = CARRIERS.with_borrow(|carriers| carriers.contains_key(&ic_cdk::caller()));
     let customer = CUSTOMERS.with_borrow(|customers| customers.contains_key(&ic_cdk::caller()));
@@ -216,8 +217,14 @@ fn roles() -> (bool, bool) {
     (carrier, customer)
 }
 
+#[query]
+fn shipments() -> Vec<Shipment> {
+    SHIPMENTS.with_borrow(|shipments| shipments.values().cloned().collect())
+}
+
 #[cfg(test)]
 mod tests {
+    use ic_cdk::query;
 
     #[test]
     fn list_shipments() {}
