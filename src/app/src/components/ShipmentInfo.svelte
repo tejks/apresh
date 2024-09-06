@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ibe_decrypt } from '$lib/encryption.svelte';
 	import type { Shipment } from '../../../declarations/contract/contract.did';
 
 	let { shipment }: { shipment: Shipment } = $props();
@@ -17,6 +18,13 @@
 			<span class="text-lg font-semibold text-rose-500">Name</span>
 			<span class="text-base">{shipment.name}</span>
 		</div>
+
+		{#if shipment.message.length > 0}
+			<div class="text-center flex flex-col space-y-3 col-span-2">
+				<span class="text-lg font-semibold text-rose-500">Message</span>
+				<span class="text-base">{ibe_decrypt(shipment.message[0])}</span>
+			</div>
+		{/if}
 
 		<div class="text-center flex flex-col space-y-3">
 			<span class="text-lg font-semibold text-rose-500">Price</span>
