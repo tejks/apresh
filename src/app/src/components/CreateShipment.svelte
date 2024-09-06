@@ -3,6 +3,8 @@
 	import { MapEvents, Marker } from 'svelte-maplibre';
 	import DecimalInput from './common/Inputs/DecimalInput.svelte';
 	import Modal from './Modal.svelte';
+	import { invalidateAll } from '$app/navigation';
+	import { wallet } from '$lib/wallet.svelte';
 
 	interface ShipmentProps {
 		showModal: boolean;
@@ -26,7 +28,13 @@
 	const createShipment = async (e: Event) => {
 		e.preventDefault();
 
-		await anonymousBackend.createShipment('', '', {
+		if (!$wallet.connected) await wallet.connect();
+		if (!$wallet.connected) return;
+
+		const priceBigint = BigInt(price);
+
+		const appRes = await wallet.approve(priceBigint);
+		const res = await $wallet.actor.createShipment('', '', {
 			size_category:
 				size_category == 'Parcel'
 					? {
@@ -39,11 +47,15 @@
 					: { Envelope: null },
 			destination,
 			source,
-			price: BigInt(price),
+			price: priceBigint,
 			value: BigInt(value)
 		});
 
+		console.log('createShipment', appRes, res);
+
 		onClose();
+
+		invalidateAll();
 	};
 
 	function getLocation(e: CustomEvent<maplibregl.MapMouseEvent>) {
