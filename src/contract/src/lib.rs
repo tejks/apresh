@@ -19,6 +19,14 @@ use models::{
 use state::{CARRIERS, CUSTOMERS, SHIPMENTS};
 use transfer::transfer_in;
 
+fn check_anonymous(caller: Principal) -> Result<(), String> {
+    if caller == Principal::anonymous() {
+        return Err("Cannot be called anonymously".to_string());
+    }
+
+    Ok(())
+}
+
 #[init]
 fn init() {
     ic_cdk::print("Initializing the shipment service");
@@ -124,6 +132,7 @@ async fn finalize_shipment(shipment_id: ShipmentIdInner) -> Result<(), String> {
 #[update(name = "buyShipment")]
 async fn buy_shipment(carrier_name: String, shipment_id: ShipmentIdInner) -> Result<(), String> {
     let carrier_id = ic_cdk::caller();
+    check_anonymous(carrier_id)?;
 
     let (buy_result, amount) = CARRIERS
         .with_borrow_mut(|carriers| {
@@ -160,6 +169,8 @@ async fn create_shipment(
     shipment_info: ShipmentInfo,
 ) -> Result<(), String> {
     let customer_id = ic_cdk::caller();
+    check_anonymous(customer_id)?;
+
     let amount = NumTokens::from(shipment_info.price());
 
     let transfer_in_args = transfer::TransferInParams {
