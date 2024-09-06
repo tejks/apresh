@@ -22,7 +22,15 @@
 		{#if shipment.message.length > 0}
 			<div class="text-center flex flex-col space-y-3 col-span-2">
 				<span class="text-lg font-semibold text-rose-500">Message</span>
-				<span class="text-base">{ibe_decrypt(shipment.message[0]!)}</span>
+				<span class="text-base"
+					>{#await ibe_decrypt(shipment.message[0]!)}
+						<p>Loading...</p>
+					{:then decrypted}
+						{decrypted}
+					{:catch error}
+						<p></p>
+					{/await}</span
+				>
 			</div>
 		{/if}
 
