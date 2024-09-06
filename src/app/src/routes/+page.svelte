@@ -97,9 +97,11 @@
 		</div>
 	</div>
 {:else if data.carried.length > 0}
-	{#each data.carried as { id, info }}
-		<Marker onClick={() => selectShipment(id)} location={info.destination} name={id}></Marker>
-	{/each}
+	{#if !showAddModal}
+		{#each data.carried as { id, info }}
+			<Marker onClick={() => selectShipment(id)} location={info.destination} name={id}></Marker>
+		{/each}
+	{/if}
 
 	<Modal bind:showModal={showBuyModal} onClose={() => (showBuyModal = false)}>
 		{#if selected}
@@ -107,9 +109,11 @@
 		{/if}
 	</Modal>
 {:else}
-	{#each data.shipments as { id, info }}
-		<Marker onClick={() => selectShipment(id)} location={info.source} name={id}></Marker>
-	{/each}
+	{#if !showAddModal}
+		{#each data.shipments as { id, info }}
+			<Marker onClick={() => selectShipment(id)} location={info.source} name={id}></Marker>
+		{/each}
+	{/if}
 
 	<Modal bind:showModal={showBuyModal} onClose={() => (showBuyModal = false)}>
 		{#if selected}

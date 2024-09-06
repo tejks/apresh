@@ -9,7 +9,7 @@
 	<h1
 		class="text-3xl text-center font-semibold inline-block bg-gradient-to-r from-blue-500 to-rose-400 bg-clip-text text-transparent mb-5"
 	>
-		Buy shipment
+		Shipment info
 	</h1>
 
 	<div class="grid grid-cols-2 gap-x-20 gap-y-8">
