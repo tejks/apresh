@@ -24,7 +24,7 @@
 		on:click|stopPropagation
 		class="flex mx-auto bg-gradient-to-tr from-blue-500 via-orange-400 to-rose-400 p-1 h-full rounded-3xl"
 	>
-		<div class="flex-1 bg-white rounded-3xl flex justify-center items-center py-10 px-16">
+		<div class="flex-1 bg-white rounded-3xl flex flex-col justify-center items-center py-10 px-16">
 			<slot name="header" />
 			<hr />
 			<slot />
