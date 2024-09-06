@@ -3,6 +3,7 @@
 	import { wallet } from '$lib/wallet.svelte';
 	import { MapEvents, Marker } from 'svelte-maplibre';
 	import DecimalInput from './common/Inputs/DecimalInput.svelte';
+	import TextInput from './common/Inputs/TextInput.svelte';
 	import Modal from './Modal.svelte';
 
 	interface ShipmentProps {
@@ -20,6 +21,7 @@
 	let max_width = $state(0);
 	let max_depth = $state(0);
 	let price = $state(0);
+	let name = $state('');
 
 	let isSelectMode = $state(false);
 	let selectModeType: 'source' | 'destination' = $state('source');
@@ -33,7 +35,7 @@
 		const priceBigint = BigInt(price);
 
 		const appRes = await wallet.approve(priceBigint);
-		const res = await $wallet.actor.createShipment('', '', {
+		const res = await $wallet.actor.createShipment('', name, {
 			size_category:
 				size_category == 'Parcel'
 					? {
@@ -53,7 +55,6 @@
 		console.log('createShipment', appRes, res);
 
 		onClose();
-
 		invalidateAll();
 	};
 
@@ -90,6 +91,7 @@
 		max_width = 0;
 		max_depth = 0;
 		price = 0;
+		name = '';
 	}
 </script>
 
@@ -110,6 +112,7 @@
 				Create shipment
 			</h1>
 
+			<TextInput label="Name" id="name" name="name" bind:value={name} required />
 			<DecimalInput label="Value" id="value" name="value" bind:value required />
 			<DecimalInput label="Price" id="price" name="price" bind:value={price} required />
 
