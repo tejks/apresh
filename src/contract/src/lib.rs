@@ -1,18 +1,14 @@
 mod models;
+mod qr;
 mod state;
 mod transfer;
-
-use std::thread::AccessError;
 
 use anyhow::anyhow;
 use candid::Principal;
 use ic_cdk::{init, query, update};
-use icrc_ledger_types::icrc1::{
-    account::{self, Account},
-    transfer::NumTokens,
-};
+use icrc_ledger_types::icrc1::transfer::NumTokens;
 use models::{
-    customer::{self, Customer},
+    customer::Customer,
     shipment::{Shipment, ShipmentInfo, ShipmentLocation, SizeCategory},
     shipment_id::{ShipmentId, ShipmentIdInner},
 };
@@ -71,6 +67,7 @@ fn init() {
         let shipment = Shipment::create(
             &mut default_customer,
             inner_shipment_id,
+            "hashed_secret".to_string(),
             names[i].to_string(),
             ShipmentInfo::new(
                 100u64 + i as u64,
@@ -168,6 +165,7 @@ async fn buy_shipment(carrier_name: String, shipment_id: ShipmentIdInner) -> Res
 async fn create_shipment(
     customer_name: String,
     shipment_name: String,
+    hashed_secret: String,
     shipment_info: ShipmentInfo,
 ) -> Result<(), String> {
     let customer_id = ic_cdk::caller();
@@ -189,7 +187,13 @@ async fn create_shipment(
         let customer = customers.get_or_create(customer_name, customer_id);
         let shipment_id = ShipmentId::new();
         let inner_shipment_id = shipment_id.into_inner();
-        let shipment = Shipment::create(customer, inner_shipment_id, shipment_name, shipment_info);
+        let shipment = Shipment::create(
+            customer,
+            inner_shipment_id,
+            hashed_secret,
+            shipment_name,
+            shipment_info,
+        );
         SHIPMENTS.with_borrow_mut(|shipments| shipments.insert(inner_shipment_id, shipment));
     });
 
@@ -221,14 +225,6 @@ fn roles() -> (bool, bool) {
 #[query]
 fn shipments() -> Vec<Shipment> {
     SHIPMENTS.with_borrow(|shipments| shipments.values().cloned().collect())
-}
-
-#[cfg(test)]
-mod tests {
-    use ic_cdk::query;
-
-    #[test]
-    fn list_shipments() {}
 }
 
 ic_cdk::export_candid!();

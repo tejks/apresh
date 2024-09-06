@@ -72,6 +72,7 @@ pub enum ShipmentStatus {
 pub struct Shipment {
     id: ShipmentIdInner,
     name: String,
+    hashed_secret: String,
     info: ShipmentInfo,
     status: ShipmentStatus,
     carrier: Option<Principal>,
@@ -83,6 +84,7 @@ impl Shipment {
     pub fn create(
         creator: &mut Customer,
         id: ShipmentIdInner,
+        hashed_secret: String,
         name: String,
         info: ShipmentInfo,
     ) -> Self {
@@ -94,6 +96,7 @@ impl Shipment {
             id,
             info,
             name,
+            hashed_secret,
             status: ShipmentStatus::Pending,
             carrier: None,
             customer: creator.id(),
