@@ -24,7 +24,9 @@ type SizeCategory = variant {
 service : () -> {
   buyShipment : (text, nat64) -> (Result);
   createShipment : (text, text, ShipmentInfo) -> (Result);
+  finalizeShipment : (nat64) -> (Result);
   listPendingShipments : () -> (vec Shipment) query;
   listUserShipments : () -> (vec Shipment, vec Shipment) query;
   roles : () -> (bool, bool) query;
+  shipments : () -> (vec Shipment) query;
 }
