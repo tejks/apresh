@@ -13,7 +13,7 @@
 		Shipment info
 	</h1>
 
-	<div class="grid grid-cols-2 gap-x-20 gap-y-8">
+	<div class="grid grid-cols-2 gap-x-20 gap-y-7">
 		<div class="text-center flex flex-col space-y-3 col-span-2">
 			<span class="text-lg font-semibold text-rose-500">Name</span>
 			<span class="text-base">{shipment.name}</span>
