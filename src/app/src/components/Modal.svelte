@@ -19,7 +19,7 @@
 
 <dialog
 	bind:this={dialog}
-	class={clsx('rounded-3xl w-[550px]', cls)}
+	class={clsx('rounded-3xl', cls ?? 'w-[550px]')}
 	on:close={onClose}
 	on:click|self={() => dialog.close()}
 >
