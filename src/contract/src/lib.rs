@@ -122,9 +122,10 @@ async fn finalize_shipment(shipment_id: ShipmentIdInner) -> Result<(), String> {
     };
 
     match finalize_result {
-        Ok(_) => transfer::transfer_out(transfer_out_carrier_args)
+        Ok(_) => Ok(transfer::transfer_out(transfer_out_carrier_args)
             .await
-            .map_err(|e| e.to_string()),
+            .map_err(|e| e.to_string())
+            .unwrap_or_else(|err| ic_cdk::trap(&err))),
         Err(e) => Err(e.to_string()),
     }
 }
@@ -158,7 +159,7 @@ async fn buy_shipment(carrier_name: String, shipment_id: ShipmentIdInner) -> Res
         Ok(_) => Ok(transfer_in(transfer_in_args)
             .await
             .map_err(|e| e.to_string())
-            .unwrap()),
+            .unwrap_or_else(|err| ic_cdk::trap(&err))),
         Err(e) => Err(e.to_string()),
     }
 }
