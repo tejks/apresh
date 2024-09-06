@@ -10,6 +10,7 @@
 	import ShipmentInfo from '../components/ShipmentInfo.svelte';
 	import type { PageData } from './$types';
 	import { anonymousBackend } from '$lib/canisters';
+	import { getLocalStorage } from '$lib/storage';
 
 	onMount(async () => {
 		await wallet.connect();
@@ -64,8 +65,13 @@
 	let selected = $state<Shipment | null>(null);
 
 	$effect(() => {
+		console.log('data', data);
 		if (!data.settleId || !data.settleSecret) return;
-		anonymousBackend.finalizeShipment(BigInt(data.settleId), [data.settleSecret]);
+
+		console.log('here');
+		anonymousBackend
+			.finalizeShipment(BigInt(data.settleId), [data.settleSecret])
+			.then((res) => console.log('endpoint res ', res));
 	});
 </script>
 
@@ -79,12 +85,22 @@
 	<Modal bind:showModal={showBuyModal} onClose={() => (showBuyModal = false)}>
 		{#if selected}
 			<ShipmentInfo shipment={selected} />
-		{/if}
 
-		<button
-			class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-7 py-2 w-1/2 mx-auto text-white text-base"
-			onclick={() => settle(selected!)}>Settle</button
-		>
+			<a href="/?settleId={selected?.id}&settleSecret={getLocalStorage(selected!.id.toString())}">
+				/?settleId={selected?.id}&settleSecret={getLocalStorage(selected!.id.toString())}
+			</a>
+
+			<button
+				class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-7 py-2 w-1/2 mx-auto text-white text-base"
+			>
+				Share
+			</button>
+
+			<button
+				class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-7 py-2 w-1/2 mx-auto text-white text-base"
+				onclick={() => settle(selected!)}>Settle</button
+			>
+		{/if}
 	</Modal>
 
 	<div class="absolute bottom-16 right-16 z-50">

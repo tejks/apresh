@@ -15,8 +15,8 @@ export async function load({ url }: LoadEvent): Promise<{
 }> {
 	const shipments = await anonymousBackend.listPendingShipments();
 
-	const settleSecret = url.searchParams.get('secret');
-	const settleId = url.searchParams.get('id');
+	const settleSecret = url.searchParams.get('settleSecret');
+	const settleId = url.searchParams.get('settleId');
 
 	let registeredCarrier = false;
 	let registeredCustomer = false;
