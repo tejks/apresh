@@ -117,7 +117,7 @@
 				</div>
 				<div class="flex items-center text-lg">OR</div>
 				<div class="flex items-center">
-					{#await getQrCode(`http://localhost:3001/?settleId=${selected?.id}&settleSecret=${getLocalStorage(selected!.id.toString())}`)}
+					{#await getQrCode(`http://localhost:3000/?settleId=${selected?.id}&settleSecret=${getLocalStorage(selected!.id.toString())}`)}
 						<span></span>
 					{:then image}
 						<div class="flex flex-col space-y-6">
@@ -129,7 +129,7 @@
 								class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-7 py-2 w-1/2 mx-auto text-white text-base transition ease-in-out hover:-translate-y-0.5 hover:scale-105 duration-200"
 								onclick={() =>
 									navigator.clipboard.writeText(
-										`http://localhost:3001/?settleId=${selected?.id}&settleSecret=${getLocalStorage(selected!.id.toString())}`
+										`http://localhost:3000/?settleId=${selected?.id}&settleSecret=${getLocalStorage(selected!.id.toString())}`
 									)}>Copy link</button
 							>
 						</div>
