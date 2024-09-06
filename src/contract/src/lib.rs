@@ -2,6 +2,8 @@ mod models;
 mod qr;
 mod state;
 mod transfer;
+mod vetkd;
+mod vetkd_types;
 
 use anyhow::anyhow;
 use candid::Principal;
@@ -82,6 +84,43 @@ fn init() {
         // Insert the shipment into the SHIPMENTS collection
         SHIPMENTS.with_borrow_mut(|shipments| shipments.insert(inner_shipment_id, shipment));
     }
+}
+
+#[update(name = "addEncryptedMessage")]
+async fn add_encrypted_message(
+    message: String,
+    shipment_id: ShipmentIdInner,
+) -> Result<(), String> {
+    let caller: Principal = ic_cdk::caller();
+
+    SHIPMENTS.with_borrow_mut(|shipments| {
+        if let Some(shipment) = shipments.get_mut(&shipment_id) {
+            if shipment.carrier_id().is_some_and(|v| v == caller) {
+                Ok(shipment.add_encrypted_message(message))
+            } else {
+                Err("Only the carrier can add an encrypted message".to_string())
+            }
+        } else {
+            Err("Shipment not found".to_string())
+        }
+    })
+}
+
+#[update(name = "readEncryptedMessage")]
+async fn read_encrypted_message(shipment_id: ShipmentIdInner) -> Result<Option<String>, String> {
+    let caller: Principal = ic_cdk::caller();
+
+    SHIPMENTS.with_borrow(|shipments| {
+        if let Some(shipment) = shipments.get(&shipment_id) {
+            if shipment.customer_id() == caller {
+                Ok(shipment.encrypted_message())
+            } else {
+                Err("Only the customer can read an encrypted message".to_string())
+            }
+        } else {
+            Err("Shipment not found".to_string())
+        }
+    })
 }
 
 #[update(name = "finalizeShipment")]

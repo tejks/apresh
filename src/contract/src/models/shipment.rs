@@ -1,12 +1,9 @@
-use std::io::SeekFrom;
-
 use super::{carrier::Carrier, customer::Customer, shipment_id::ShipmentIdInner};
 use anyhow::Context;
 use candid::{CandidType, Principal};
 use hex::FromHex;
-use hex_literal::hex;
 use serde::{Deserialize, Serialize};
-use sha2::{Digest, Sha256, Sha512};
+use sha2::{Digest, Sha256};
 
 #[derive(Deserialize, Serialize, Debug, Clone, CandidType)]
 pub enum SizeCategory {
@@ -81,12 +78,21 @@ pub struct Shipment {
     hashed_secret: String,
     info: ShipmentInfo,
     status: ShipmentStatus,
+    message: Option<String>,
     carrier: Option<Principal>,
     customer: Principal,
     created_at: u64,
 }
 
 impl Shipment {
+    pub fn add_encrypted_message(&mut self, message: String) {
+        self.message = Some(message);
+    }
+
+    pub fn encrypted_message(&self) -> Option<String> {
+        self.message.clone()
+    }
+
     pub fn create(
         creator: &mut Customer,
         id: ShipmentIdInner,
@@ -102,6 +108,7 @@ impl Shipment {
             id,
             info,
             name,
+            message: None,
             hashed_secret,
             status: ShipmentStatus::Pending,
             carrier: None,
@@ -117,7 +124,7 @@ impl Shipment {
         let hex = Vec::from_hex(self.hashed_secret.clone()).context("invalid hex")?;
 
         let mut hasher = Sha256::new();
-        hasher.update(secret); 
+        hasher.update(secret);
         let result = hasher.finalize();
 
         if result[..] == hex {
@@ -138,7 +145,7 @@ impl Shipment {
             return Err(anyhow::anyhow!("shipment is not ready to be finalized"));
         }
 
-        match caller == self.customer { 
+        match caller == self.customer {
             true => {}
             false => self.validate_secret(secret_key)?,
         }

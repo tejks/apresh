@@ -6,6 +6,7 @@ type QrCodeOptions = record {
 };
 type Result = variant { Ok; Err : text };
 type Result_1 = variant { Ok : record { blob; nat64 }; Err : text };
+type Result_2 = variant { Ok : opt text; Err : text };
 type Shipment = record {
   id : nat64;
   status : ShipmentStatus;
@@ -13,6 +14,7 @@ type Shipment = record {
   info : ShipmentInfo;
   name : text;
   created_at : nat64;
+  message : opt text;
   hashed_secret : text;
   carrier : opt principal;
 };
@@ -30,13 +32,17 @@ type SizeCategory = variant {
   Envelope;
 };
 service : () -> {
+  addEncryptedMessage : (text, nat64) -> (Result);
   buyShipment : (text, nat64) -> (Result);
   createShipment : (text, text, text, QrCodeOptions, ShipmentInfo) -> (
       Result_1,
     );
+  encrypted_ibe_decryption_key_for_caller : (blob) -> (text);
   finalizeShipment : (nat64, opt text) -> (Result);
+  ibe_encryption_key : () -> (text);
   listPendingShipments : () -> (vec Shipment) query;
   listUserShipments : () -> (vec Shipment, vec Shipment) query;
+  readEncryptedMessage : (nat64) -> (Result_2);
   roles : () -> (bool, bool) query;
   shipments : () -> (vec Shipment) query;
 }
