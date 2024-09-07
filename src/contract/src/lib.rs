@@ -1,18 +1,15 @@
 mod models;
+mod qr;
 mod state;
 mod transfer;
-
-use std::thread::AccessError;
 
 use anyhow::anyhow;
 use candid::Principal;
 use ic_cdk::{init, query, update};
-use icrc_ledger_types::icrc1::{
-    account::{self, Account},
-    transfer::NumTokens,
-};
+use icrc_ledger_types::icrc1::transfer::NumTokens;
 use models::{
-    customer::{self, Customer},
+    customer::Customer,
+    qrcode::QrCodeOptions,
     shipment::{Shipment, ShipmentInfo, ShipmentLocation, SizeCategory},
     shipment_id::{ShipmentId, ShipmentIdInner},
 };
@@ -71,6 +68,7 @@ fn init() {
         let shipment = Shipment::create(
             &mut default_customer,
             inner_shipment_id,
+            "hashed_secret".to_string(),
             names[i].to_string(),
             ShipmentInfo::new(
                 100u64 + i as u64,
@@ -87,7 +85,11 @@ fn init() {
 }
 
 #[update(name = "finalizeShipment")]
-async fn finalize_shipment(shipment_id: ShipmentIdInner) -> Result<(), String> {
+async fn finalize_shipment(
+    shipment_id: ShipmentIdInner,
+    secret_key: Option<String>,
+) -> Result<(), String> {
+    let caller = ic_cdk::caller();
     let (finalize_result, carrier, value, price) = SHIPMENTS
         .with_borrow_mut(|shipments| {
             let shipment = shipments
@@ -101,11 +103,11 @@ async fn finalize_shipment(shipment_id: ShipmentIdInner) -> Result<(), String> {
 
                 CARRIERS.with_borrow_mut(|carriers| {
                     let carrier = carriers
-                        .get_mut(&shipment.carrier_id().ok_or(anyhow!("Carrier not found"))?)
-                        .ok_or(anyhow!("Customer not found"))?;
+                        .get_mut(&shipment.carrier_id().ok_or(anyhow!("Carrier not set"))?)
+                        .ok_or(anyhow!("Carrier not found"))?;
 
                     Ok((
-                        shipment.finalize(carrier, customer),
+                        shipment.finalize(carrier, customer, secret_key, caller),
                         carrier.id(),
                         shipment.info().value(),
                         shipment.info().price(),
@@ -124,8 +126,7 @@ async fn finalize_shipment(shipment_id: ShipmentIdInner) -> Result<(), String> {
     match finalize_result {
         Ok(_) => Ok(transfer::transfer_out(transfer_out_carrier_args)
             .await
-            .map_err(|e| e.to_string())
-            .unwrap_or_else(|err| ic_cdk::trap(&err))),
+            .unwrap_or_else(|err| ic_cdk::trap(&err.to_string()))),
         Err(e) => Err(e.to_string()),
     }
 }
@@ -158,18 +159,30 @@ async fn buy_shipment(carrier_name: String, shipment_id: ShipmentIdInner) -> Res
     match buy_result {
         Ok(_) => Ok(transfer_in(transfer_in_args)
             .await
-            .map_err(|e| e.to_string())
-            .unwrap_or_else(|err| ic_cdk::trap(&err))),
+            .unwrap_or_else(|err| ic_cdk::trap(&err.to_string()))),
         Err(e) => Err(e.to_string()),
     }
+}
+
+#[query(name = "generateQr")]
+async fn generate_qr(link: String, size: usize) -> Result<Vec<u8>, String> {
+    qr::generate(QrCodeOptions {
+        gradient: false,
+        link,
+        size,
+        transparent: false,
+    })
+    .map_err(|e| e.to_string())
 }
 
 #[update(name = "createShipment")]
 async fn create_shipment(
     customer_name: String,
     shipment_name: String,
+    hashed_secret: String,
+    qr_options: QrCodeOptions,
     shipment_info: ShipmentInfo,
-) -> Result<(), String> {
+) -> Result<(Vec<u8>, ShipmentIdInner), String> {
     let customer_id = ic_cdk::caller();
     check_anonymous(customer_id)?;
 
@@ -185,15 +198,24 @@ async fn create_shipment(
         .await
         .map_err(|e| e.to_string())?;
 
-    CUSTOMERS.with_borrow_mut(|customers| {
+    let shipment_id = CUSTOMERS.with_borrow_mut(|customers| {
         let customer = customers.get_or_create(customer_name, customer_id);
         let shipment_id = ShipmentId::new();
         let inner_shipment_id = shipment_id.into_inner();
-        let shipment = Shipment::create(customer, inner_shipment_id, shipment_name, shipment_info);
+        let shipment = Shipment::create(
+            customer,
+            inner_shipment_id,
+            hashed_secret,
+            shipment_name,
+            shipment_info,
+        );
         SHIPMENTS.with_borrow_mut(|shipments| shipments.insert(inner_shipment_id, shipment));
+        inner_shipment_id
     });
 
-    Ok(())
+    let qr_code = qr::generate(qr_options).unwrap_or_else(|err| ic_cdk::trap(&err.to_string()));
+
+    Ok((qr_code, shipment_id))
 }
 
 #[query(name = "listPendingShipments")]
@@ -221,14 +243,6 @@ fn roles() -> (bool, bool) {
 #[query]
 fn shipments() -> Vec<Shipment> {
     SHIPMENTS.with_borrow(|shipments| shipments.values().cloned().collect())
-}
-
-#[cfg(test)]
-mod tests {
-    use ic_cdk::query;
-
-    #[test]
-    fn list_shipments() {}
 }
 
 ic_cdk::export_candid!();

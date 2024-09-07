@@ -1,6 +1,12 @@
+use std::io::SeekFrom;
+
 use super::{carrier::Carrier, customer::Customer, shipment_id::ShipmentIdInner};
+use anyhow::Context;
 use candid::{CandidType, Principal};
+use hex::FromHex;
+use hex_literal::hex;
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256, Sha512};
 
 #[derive(Deserialize, Serialize, Debug, Clone, CandidType)]
 pub enum SizeCategory {
@@ -72,6 +78,7 @@ pub enum ShipmentStatus {
 pub struct Shipment {
     id: ShipmentIdInner,
     name: String,
+    hashed_secret: String,
     info: ShipmentInfo,
     status: ShipmentStatus,
     carrier: Option<Principal>,
@@ -83,6 +90,7 @@ impl Shipment {
     pub fn create(
         creator: &mut Customer,
         id: ShipmentIdInner,
+        hashed_secret: String,
         name: String,
         info: ShipmentInfo,
     ) -> Self {
@@ -94,6 +102,7 @@ impl Shipment {
             id,
             info,
             name,
+            hashed_secret,
             status: ShipmentStatus::Pending,
             carrier: None,
             customer: creator.id(),
@@ -103,13 +112,35 @@ impl Shipment {
         shipment
     }
 
+    fn validate_secret(&self, secret: Option<String>) -> anyhow::Result<()> {
+        let secret = secret.ok_or(anyhow::anyhow!("missing secret"))?;
+        let hex = Vec::from_hex(self.hashed_secret.clone()).context("invalid hex")?;
+
+        let mut hasher = Sha256::new();
+        hasher.update(secret); 
+        let result = hasher.finalize();
+
+        if result[..] == hex {
+            return Ok(());
+        } else {
+            return Err(anyhow::anyhow!("secret verification failed"));
+        }
+    }
+
     pub fn finalize(
         &mut self,
         carrier: &mut Carrier,
         customer: &mut Customer,
+        secret_key: Option<String>,
+        caller: Principal,
     ) -> anyhow::Result<()> {
         if self.status != ShipmentStatus::InTransit {
             return Err(anyhow::anyhow!("shipment is not ready to be finalized"));
+        }
+
+        match caller == self.customer { 
+            true => {}
+            false => self.validate_secret(secret_key)?,
         }
 
         self.status = ShipmentStatus::Delivered;
@@ -128,7 +159,6 @@ impl Shipment {
         self.carrier = Some(carrier.id());
         self.status = ShipmentStatus::InTransit;
 
-        
         carrier.add_shipment(self.id());
 
         Ok(())
@@ -154,3 +184,31 @@ impl Shipment {
         &self.info
     }
 }
+
+// works, but cannot be used in tests, beacuse of icp code
+// #[cfg(test)]
+// mod hash_verify_test {
+//     use super::*;
+
+//     #[test]
+//     fn test_hash_verify() {
+//         let secret = "secret";
+//         let hex =  "2bb80d537b1da3e38bd30361aa855686bde0eacd7162fef6a25fe97bf527a25b";
+
+//         let shipment = Shipment::create(
+//             &mut Customer::new(Principal::anonymous(), "Jacek".to_string()),
+//             ShipmentIdInner::default(),
+//             hex.to_string(),
+//             "name".to_string(),
+//             ShipmentInfo::new(
+//                 0,
+//                 0,
+//                 ShipmentLocation::new("street".to_string(), 0.0, 0.0),
+//                 ShipmentLocation::new("street".to_string(), 0.0, 0.0),
+//                 SizeCategory::Envelope,
+//             ),
+//         );
+
+//         assert!(shipment.validate_secret(Some(secret.to_string())).is_ok());
+//     }
+// }

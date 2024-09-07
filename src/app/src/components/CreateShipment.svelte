@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
+	import { getLocalStorage, setLocalStorage } from '$lib/storage';
 	import { wallet } from '$lib/wallet.svelte';
+	import { sha256 } from 'js-sha256';
 	import { MapEvents, Marker } from 'svelte-maplibre';
 	import DecimalInput from './common/Inputs/DecimalInput.svelte';
 	import TextInput from './common/Inputs/TextInput.svelte';
@@ -35,22 +37,46 @@
 		const priceBigint = BigInt(price);
 
 		const appRes = await wallet.approve(priceBigint);
-		const res = await $wallet.actor.createShipment('', name, {
-			size_category:
-				size_category == 'Parcel'
-					? {
-							Parcel: {
-								max_height: BigInt(max_height),
-								max_width: BigInt(max_width),
-								max_depth: BigInt(max_depth)
+		const secret = 'secret';
+
+		const hash = sha256.create();
+		hash.update(secret);
+		const hashed = hash.hex();
+
+		const res = await $wallet.actor.createShipment(
+			'',
+			name,
+			hashed,
+			{
+				link: '',
+				size: BigInt(100),
+				gradient: true,
+				transparent: false
+			},
+			{
+				size_category:
+					size_category == 'Parcel'
+						? {
+								Parcel: {
+									max_height: BigInt(max_height),
+									max_width: BigInt(max_width),
+									max_depth: BigInt(max_depth)
+								}
 							}
-						}
-					: { Envelope: null },
-			destination,
-			source,
-			price: priceBigint,
-			value: BigInt(value)
-		});
+						: { Envelope: null },
+				destination,
+				source,
+				price: priceBigint,
+				value: BigInt(value)
+			}
+		);
+
+		if (Object.keys(res)[0] === 'Ok') {
+			const id: bigint = (res as { Ok: [number[], bigint] }).Ok[1];
+			setLocalStorage(id.toString(), secret);
+			const loadedDone = getLocalStorage('done', secret);
+			console.log('loadedDone', loadedDone);
+		}
 
 		console.log('createShipment', appRes, res);
 
@@ -121,7 +147,7 @@
 					<span>Source</span>
 					{#if !source.street}
 						<button
-							class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-4 py-1 mx-auto text-white"
+							class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-4 py-1 mx-auto text-white transition ease-in-out hover:-translate-y-0.5 hover:scale-105 duration-200"
 							onclick={selectSource}>Select location</button
 						>
 					{:else}
@@ -134,7 +160,7 @@
 					<span>Destination</span>
 					{#if !destination.street}
 						<button
-							class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-4 py-1 mx-auto text-white"
+							class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-4 py-1 mx-auto text-white transition ease-in-out hover:-translate-y-0.5 hover:scale-105 duration-200"
 							onclick={selectDestination}>Select location</button
 						>
 					{:else}
@@ -186,7 +212,7 @@
 
 			<button
 				type="submit"
-				class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-7 py-2 w-1/2 mx-auto text-white text-base"
+				class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-7 py-2 w-3/5 mx-auto text-white text-base transition ease-in-out hover:-translate-y-0.5 hover:scale-105 duration-200"
 				>Create Shipment</button
 			>
 		</form>
