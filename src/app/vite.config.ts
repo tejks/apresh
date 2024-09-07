@@ -3,6 +3,8 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import environment from 'vite-plugin-environment';
 import dotenv from 'dotenv';
+import wasm from "vite-plugin-wasm";
+import topLevelAwait from "vite-plugin-top-level-await";
 
 dotenv.config({ path: '../../.env' });
 
@@ -27,6 +29,8 @@ export default defineConfig({
 		}
 	},
 	plugins: [
+		topLevelAwait(),
+		wasm(),
 		sveltekit(),
 		environment('all', { prefix: 'CANISTER_' }),
 		environment('all', { prefix: 'DFX_' })
