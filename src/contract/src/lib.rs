@@ -2,8 +2,8 @@ mod models;
 mod qr;
 mod state;
 mod transfer;
+mod utils;
 mod vetkd;
-mod vetkd_types;
 
 use anyhow::anyhow;
 use candid::Principal;
@@ -16,15 +16,10 @@ use models::{
     shipment_id::{ShipmentId, ShipmentIdInner},
 };
 use state::{CARRIERS, CUSTOMERS, SHIPMENTS};
-use transfer::transfer_in;
+use transfer::{transfer_in, transfer_out, TransferInParams, TransferOutParams, TransferParams};
+use utils::block_anonymous;
 
-fn check_anonymous(caller: Principal) -> Result<(), String> {
-    if caller == Principal::anonymous() {
-        return Err("Cannot be called anonymously".to_string());
-    }
-
-    Ok(())
-}
+pub use vetkd::{encrypted_ibe_decryption_key_for_caller, ibe_encryption_key};
 
 #[init]
 fn init() {
@@ -156,14 +151,16 @@ async fn finalize_shipment(
         })
         .map_err(|e: anyhow::Error| e.to_string())?;
 
-    let transfer_out_carrier_args = transfer::TransferOutParams {
-        amount: NumTokens::from(value + price),
+    let transfer_out_carrier_args = TransferOutParams {
+        params: TransferParams {
+            amount: NumTokens::from(value + price),
+            memo: None,
+        },
         to: carrier.into(),
-        memo: None,
     };
 
     match finalize_result {
-        Ok(_) => Ok(transfer::transfer_out(transfer_out_carrier_args)
+        Ok(_) => Ok(transfer_out(transfer_out_carrier_args)
             .await
             .unwrap_or_else(|err| ic_cdk::trap(&err.to_string()))),
         Err(e) => Err(e.to_string()),
@@ -172,8 +169,9 @@ async fn finalize_shipment(
 
 #[update(name = "buyShipment")]
 async fn buy_shipment(carrier_name: String, shipment_id: ShipmentIdInner) -> Result<(), String> {
+    block_anonymous()?;
+
     let carrier_id = ic_cdk::caller();
-    check_anonymous(carrier_id)?;
 
     let (buy_result, amount) = CARRIERS
         .with_borrow_mut(|carriers| {
@@ -189,10 +187,12 @@ async fn buy_shipment(carrier_name: String, shipment_id: ShipmentIdInner) -> Res
         })
         .map_err(|e: anyhow::Error| e.to_string())?;
 
-    let transfer_in_args = transfer::TransferInParams {
-        amount: NumTokens::from(amount),
+    let transfer_in_args = TransferInParams {
+        params: TransferParams {
+            amount: NumTokens::from(amount),
+            memo: None,
+        },
         from: carrier_id.into(),
-        memo: None,
     };
 
     match buy_result {
@@ -222,15 +222,17 @@ async fn create_shipment(
     qr_options: QrCodeOptions,
     shipment_info: ShipmentInfo,
 ) -> Result<(Vec<u8>, ShipmentIdInner), String> {
-    let customer_id = ic_cdk::caller();
-    check_anonymous(customer_id)?;
+    block_anonymous()?;
 
+    let customer_id = ic_cdk::caller();
     let amount = NumTokens::from(shipment_info.price());
 
-    let transfer_in_args = transfer::TransferInParams {
-        amount: NumTokens::from(amount),
+    let transfer_in_args = TransferInParams {
+        params: TransferParams {
+            amount: NumTokens::from(amount),
+            memo: None,
+        },
         from: customer_id.into(),
-        memo: None,
     };
 
     transfer_in(transfer_in_args)
