@@ -35,11 +35,11 @@ impl Customer {
         self.id
     }
 
-    pub fn name(&self) -> &str {
+    pub fn _name(&self) -> &str {
         &self.name
     }
 
-    pub fn shipments(&self) -> &[ShipmentIdInner] {
+    pub fn _shipments(&self) -> &[ShipmentIdInner] {
         &self.shipments
     }
 }

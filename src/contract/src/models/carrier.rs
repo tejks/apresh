@@ -30,20 +30,20 @@ impl Carrier {
         self.shipments.retain(|&x| x != shipment_id);
         self.shipments_done += 1;
     }
-    
+
     pub fn id(&self) -> Principal {
         self.id
     }
 
-    pub fn name(&self) -> &str {
+    pub fn _name(&self) -> &str {
         &self.name
     }
 
-    pub fn shipments(&self) -> &[ShipmentIdInner] {
+    pub fn _shipments(&self) -> &[ShipmentIdInner] {
         &self.shipments
     }
 
-    pub fn shipments_done(&self) -> u32 {
+    pub fn _shipments_done(&self) -> u32 {
         self.shipments_done
     }
 }
