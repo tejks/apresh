@@ -13,7 +13,7 @@
 	import type { PageData } from './$types';
 	import TextInput from '../components/common/Inputs/TextInput.svelte';
 	import { Principal } from '@dfinity/principal';
-	import * as vetkd from 'ic-vetkd-utils';
+	// import * as vetkd from 'ic-vetkd-utils';
 
 	onMount(async () => {
 		await invalidateAll();
@@ -47,14 +47,15 @@
 		const message_encoded = new TextEncoder().encode(message);
 		const seed = window.crypto.getRandomValues(new Uint8Array(32));
 
-		const ibe_ciphertext = vetkd.IBECiphertext.encrypt(
-			hex_decode(pk_bytes_hex),
-			principal.toUint8Array(),
-			message_encoded,
-			seed
-		);
+		// const ibe_ciphertext = vetkd.IBECiphertext.encrypt(
+		// 	hex_decode(pk_bytes_hex),
+		// 	principal.toUint8Array(),
+		// 	message_encoded,
+		// 	seed
+		// );
 
-		return hex_encode(ibe_ciphertext.serialize());
+		// return hex_encode(ibe_ciphertext.serialize());
+		return hex_encode(new Uint8Array());
 	}
 
 	async function buy(shipment: Shipment) {
