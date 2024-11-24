@@ -8,7 +8,7 @@
 	import type { Shipment } from '../../../declarations/contract/contract.did';
 	import CreateShipmentForm from '../components/CreateShipment.svelte';
 	import Marker from '../components/Marker.svelte';
-	import Modal from '../components/Modal.svelte';
+	import Modal from '../components/modal/Modal.svelte';
 	import ShipmentInfo from '../components/ShipmentInfo.svelte';
 	import type { PageData } from './$types';
 	import TextInput from '../components/common/Inputs/TextInput.svelte';

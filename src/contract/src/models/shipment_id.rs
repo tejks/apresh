@@ -22,7 +22,7 @@ impl DerefMut for ShipmentId {
 impl ShipmentId {
     pub fn new() -> Self {
         let id = SHIPMENT_COUNTER.with_borrow_mut(|counter| {
-            let current = *counter; 
+            let current = *counter;
             *counter = current + 1;
             current
         });

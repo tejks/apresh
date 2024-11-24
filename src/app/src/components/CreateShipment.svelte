@@ -6,7 +6,7 @@
 	import { MapEvents, Marker } from 'svelte-maplibre';
 	import DecimalInput from './common/Inputs/DecimalInput.svelte';
 	import TextInput from './common/Inputs/TextInput.svelte';
-	import Modal from './Modal.svelte';
+	import Modal from './modal/Modal.svelte';
 
 	interface ShipmentProps {
 		showModal: boolean;
