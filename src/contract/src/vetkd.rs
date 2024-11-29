@@ -1,5 +1,8 @@
+use crate::vetkd_types::{
+    VetKDCurve, VetKDEncryptedKeyReply, VetKDEncryptedKeyRequest, VetKDKeyId, VetKDPublicKeyReply,
+    VetKDPublicKeyRequest,
+};
 use ic_cdk::{api::management_canister::main::CanisterId, update};
-use crate::vetkd_types::{VetKDCurve, VetKDEncryptedKeyReply, VetKDEncryptedKeyRequest, VetKDKeyId, VetKDPublicKeyReply, VetKDPublicKeyRequest};
 use std::str::FromStr;
 const VETKD_SYSTEM_API_CANISTER_ID: &str = "s55qq-oqaaa-aaaaa-aaakq-cai";
 

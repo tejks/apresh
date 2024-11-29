@@ -38,7 +38,7 @@ fn init() {
     );
 
     // Define a set of realistic coordinates for shipment locations
-    let locations = vec![
+    let locations = [
         ("A", 40.7128, -74.0060),  // New York, USA
         ("B", 34.0522, -118.2437), // Los Angeles, USA
         ("C", 51.5074, -0.1278),   // London, UK
@@ -47,7 +47,7 @@ fn init() {
         ("F", -33.8688, 151.2093), // Sydney, Australia
     ];
 
-    let names = vec![
+    let names: [&str; 10] = [
         "John Doe",
         "Jane Doe",
         "Alice Smith",
@@ -60,7 +60,7 @@ fn init() {
         "Harry Black",
     ];
 
-    for i in 0..10 {
+    for (i, name) in names.iter().enumerate() {
         let shipment_id = ShipmentId::new();
         let inner_shipment_id = shipment_id.into_inner();
 
@@ -71,7 +71,7 @@ fn init() {
             &mut default_customer,
             inner_shipment_id,
             "hashed_secret".to_string(),
-            names[i].to_string(),
+            name.to_string(),
             ShipmentInfo::new(
                 100u64 + i as u64,
                 10u64 + i as u64,
@@ -94,15 +94,16 @@ async fn add_encrypted_message(
     let caller: Principal = ic_cdk::caller();
 
     SHIPMENTS.with_borrow_mut(|shipments| {
-        if let Some(shipment) = shipments.get_mut(&shipment_id) {
-            if shipment.carrier_id().is_some_and(|v| v == caller) {
-                Ok(shipment.add_encrypted_message(message))
-            } else {
-                Err("Only the carrier can add an encrypted message".to_string())
-            }
-        } else {
-            Err("Shipment not found".to_string())
+        let Some(shipment) = shipments.get_mut(&shipment_id) else {
+            return Err("Shipment not found".to_string());
+        };
+
+        if shipment.carrier_id().is_some_and(|v| v != caller) {
+            return Err("Only the carrier can add an encrypted message".to_string());
         }
+
+        shipment.add_encrypted_message(message);
+        Ok(())
     })
 }
 
@@ -162,12 +163,15 @@ async fn finalize_shipment(
         memo: None,
     };
 
-    match finalize_result {
-        Ok(_) => Ok(transfer::transfer_out(transfer_out_carrier_args)
-            .await
-            .unwrap_or_else(|err| ic_cdk::trap(&err.to_string()))),
-        Err(e) => Err(e.to_string()),
+    if let Err(e) = finalize_result {
+        return Err(e.to_string());
     }
+
+    if let Err(e) = transfer::transfer_out(transfer_out_carrier_args).await {
+        ic_cdk::trap(&e.to_string())
+    }
+
+    Ok(())
 }
 
 #[update(name = "buyShipment")]
@@ -195,12 +199,15 @@ async fn buy_shipment(carrier_name: String, shipment_id: ShipmentIdInner) -> Res
         memo: None,
     };
 
-    match buy_result {
-        Ok(_) => Ok(transfer_in(transfer_in_args)
-            .await
-            .unwrap_or_else(|err| ic_cdk::trap(&err.to_string()))),
-        Err(e) => Err(e.to_string()),
+    if let Err(e) = buy_result {
+        return Err(e.to_string());
     }
+
+    if let Err(e) = transfer_in(transfer_in_args).await {
+        ic_cdk::trap(&e.to_string())
+    }
+
+    Ok(())
 }
 
 #[query(name = "generateQr")]

@@ -104,7 +104,7 @@ impl Shipment {
 
         creator.add_shipment(id);
 
-        let shipment = Self {
+        Self {
             id,
             info,
             name,
@@ -114,9 +114,7 @@ impl Shipment {
             carrier: None,
             customer: creator.id(),
             created_at,
-        };
-
-        shipment
+        }
     }
 
     fn validate_secret(&self, secret: Option<String>) -> anyhow::Result<()> {
@@ -127,11 +125,11 @@ impl Shipment {
         hasher.update(secret);
         let result = hasher.finalize();
 
-        if result[..] == hex {
-            return Ok(());
-        } else {
+        if result[..] != hex {
             return Err(anyhow::anyhow!("secret verification failed"));
         }
+
+        Ok(())
     }
 
     pub fn finalize(
