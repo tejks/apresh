@@ -7,6 +7,7 @@
 	import DecimalInput from '../common/Inputs/DecimalInput.svelte';
 	import TextInput from '../common/Inputs/TextInput.svelte';
 	import Modal from '../modal/Modal.svelte';
+	import * as Tabs from '$lib/components/ui/tabs';
 
 	interface ShipmentProps {
 		showModal: boolean;
@@ -18,7 +19,7 @@
 	let source = $state({ lat: 0, lng: 0, street: '' });
 	let destination = $state({ lat: 0, lng: 0, street: '' });
 	let value = $state(0);
-	let size_category: 'Parcel' | 'Envelope' = $state('Parcel');
+	let size_category: string = 'Parcel';
 	let max_height = $state(0);
 	let max_width = $state(0);
 	let max_depth = $state(0);
@@ -171,44 +172,39 @@
 				</div>
 			</div>
 
-			<div class="flex flex-col">
-				<label for="size_category" class="ml-1.5">Size Category</label>
-				<div class="rounded-lg border-2 border-gradient-to-r from-primary to-secondary">
-					<select
-						id="size_category"
-						name="size_category"
-						bind:value={size_category}
-						class="w-full rounded-3xl bg-transparent text-neutral-600 font-normal focus:outline-none px-4 py-2.5 text-base"
-					>
-						<option value="Parcel">Parcel</option>
-						<option value="Envelope">Envelope</option>
-					</select>
-				</div>
-			</div>
-
-			{#if size_category === 'Parcel'}
-				<DecimalInput
-					label="Height"
-					id="max_height"
-					name="max_height"
-					bind:value={max_height}
-					required
-				/>
-				<DecimalInput
-					label="Width"
-					id="max_width"
-					name="max_width"
-					bind:value={max_width}
-					required
-				/>
-				<DecimalInput
-					label="Depth"
-					id="max_depth"
-					name="max_depth"
-					bind:value={max_depth}
-					required
-				/>
-			{/if}
+			<Tabs.Root
+				value={size_category ?? 'Parcel'}
+				onValueChange={(value) => (size_category = value!)}
+				class="w-full"
+			>
+				<Tabs.List class="grid w-full grid-cols-2">
+					<Tabs.Trigger value="Parcel">Parcel</Tabs.Trigger>
+					<Tabs.Trigger value="Envelope">Envelope</Tabs.Trigger>
+				</Tabs.List>
+				<Tabs.Content value="Parcel">
+					<DecimalInput
+						label="Height"
+						id="max_height"
+						name="max_height"
+						bind:value={max_height}
+						required
+					/>
+					<DecimalInput
+						label="Width"
+						id="max_width"
+						name="max_width"
+						bind:value={max_width}
+						required
+					/>
+					<DecimalInput
+						label="Depth"
+						id="max_depth"
+						name="max_depth"
+						bind:value={max_depth}
+						required
+					/>
+				</Tabs.Content>
+			</Tabs.Root>
 
 			<button
 				type="submit"
