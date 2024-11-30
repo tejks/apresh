@@ -13,6 +13,7 @@
 	import TextInput from '../components/common/Inputs/TextInput.svelte';
 	import { Principal } from '@dfinity/principal';
 	import MapButton from '../components/MapButton.svelte';
+	import QrCodeDisplay from 'src/components/QrCodeDisplay.svelte';
 	// import * as vetkd from 'ic-vetkd-utils';
 
 	onMount(async () => {
@@ -153,27 +154,12 @@
 				</div>
 				<div class="flex items-center text-lg">OR</div>
 				<div class="flex items-center">
-					{#await getQrCode(`http://localhost:3000/?settleId=${selected?.id}&settleSecret=${getLocalStorage(selected!.id.toString())}`)}
-						<span></span>
-					{:then image}
-						<div class="flex flex-col space-y-6">
-							<div class="bg-gradient-to-r from-blue-500 to-rose-400 w-72 h-72 rounded-3xl p-0.5">
-								<img src={image} alt="qr code" class="rounded-3xl" />
-							</div>
-
-							<button
-								onclick={() =>
-									navigator.clipboard.writeText(
-										`http://localhost:3000/?settleId=${selected?.id}&settleSecret=${getLocalStorage(selected!.id.toString())}`
-									)}
-								class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-7 py-2 w-1/2 mx-auto text-white text-base transition ease-in-out hover:-translate-y-0.5 hover:scale-105 duration-200"
-							>
-								Copy link
-							</button>
-						</div>
-					{:catch error}
-						<p style="color: red">{error.message}</p>
-					{/await}
+					{#if selected}
+						<QrCodeDisplay
+							settleId={selected.id}
+							settleSecret={getLocalStorage(selected.id.toString())}
+						/>
+					{/if}
 				</div>
 			</div>
 		{/if}
@@ -216,5 +202,5 @@
 		</button>
 	</Modal>
 
-	<MapButton showModal={showAddModal} />
+	<MapButton bind:showModal={showAddModal} />
 {/if}

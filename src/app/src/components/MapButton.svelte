@@ -2,11 +2,11 @@
 	import { Plus } from 'lucide-svelte';
 	import { wallet } from '$lib/wallet.svelte';
 
-	let showAddModal = $props<boolean>();
+	let { showModal = $bindable() } = $props<boolean>();
 
 	function handleClick() {
 		if (!$wallet.connected) wallet.connect();
-		showAddModal = true;
+		showModal = true;
 	}
 </script>
 
