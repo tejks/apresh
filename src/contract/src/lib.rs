@@ -193,7 +193,7 @@ async fn buy_shipment(carrier_name: String, shipment_id: ShipmentIdInner) -> Res
         })
         .map_err(|e: anyhow::Error| e.to_string())?;
 
-    let transfer_in_args = transfer::TransferInParams {
+    let _transfer_in_args = transfer::TransferInParams {
         amount: NumTokens::from(amount),
         from: carrier_id.into(),
         memo: None,
@@ -203,9 +203,9 @@ async fn buy_shipment(carrier_name: String, shipment_id: ShipmentIdInner) -> Res
         return Err(e.to_string());
     }
 
-    if let Err(e) = transfer_in(transfer_in_args).await {
-        ic_cdk::trap(&e.to_string())
-    }
+    // if let Err(e) = transfer_in(transfer_in_args).await {
+    //     ic_cdk::trap(&e.to_string())
+    // }
 
     Ok(())
 }
@@ -232,17 +232,17 @@ async fn create_shipment(
     let customer_id = ic_cdk::caller();
     check_anonymous(customer_id)?;
 
-    let amount = NumTokens::from(shipment_info.price());
+    // let amount = NumTokens::from(shipment_info.price());
 
-    let transfer_in_args = transfer::TransferInParams {
-        amount: NumTokens::from(amount),
-        from: customer_id.into(),
-        memo: None,
-    };
+    // let transfer_in_args = transfer::TransferInParams {
+    //     amount: NumTokens::from(amount),
+    //     from: customer_id.into(),
+    //     memo: None,
+    // };
 
-    transfer_in(transfer_in_args)
-        .await
-        .map_err(|e| e.to_string())?;
+    // transfer_in(transfer_in_args)
+    //     .await
+    //     .map_err(|e| e.to_string())?;
 
     let shipment_id = CUSTOMERS.with_borrow_mut(|customers| {
         let customer = customers.get_or_create(customer_name, customer_id);
