@@ -26,7 +26,8 @@
 		"baseUrl": ".",
 		"paths": {
 			"$lib/*": ["src/lib/*"],
-			"$declarations/*": ["../declarations/*"]
+			"$declarations/*": ["../declarations/*"],
+			"$components/*": ["src/components/*"]
 		}
 	},
 	"include": [
