@@ -42,23 +42,23 @@ export const connect = async () => {
 	return { actor, tokenActor, identity };
 };
 
-export const createTestActor = async (
-	canisterId: string,
-	options: any
-): Promise<ActorSubclass<_SERVICE>> => {
-	const agent = new HttpAgent({ ...options?.agentOptions });
-	await agent.fetchRootKey();
+// export const createTestActor = async (
+// 	canisterId: string,
+// 	options: any
+// ): Promise<ActorSubclass<_SERVICE>> => {
+// 	const agent = new HttpAgent({ ...options?.agentOptions });
+// 	await agent.fetchRootKey();
 
-	// Creates an actor with using the candid interface and the HttpAgent
-	return Actor.createActor(idlFactory, {
-		agent,
-		canisterId,
-		...options?.actorOptions
-	});
-};
+// 	// Creates an actor with using the candid interface and the HttpAgent
+// 	return Actor.createActor(idlFactory, {
+// 		agent,
+// 		canisterId,
+// 		...options?.actorOptions
+// 	});
+// };
 
 export const contractCanister = canisterIds.contract.local;
 
-export const testContract = await createTestActor(contractCanister, {
-	agentOptions: { host: 'http://localhost:4943', fetch }
-});
+// export const testContract = await createTestActor(contractCanister, {
+// 	agentOptions: { host: 'http://localhost:4943', fetch }
+// });
