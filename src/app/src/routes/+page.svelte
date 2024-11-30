@@ -5,7 +5,7 @@
 	import { wallet } from '$lib/wallet.svelte';
 	import { onMount } from 'svelte';
 	import type { Shipment } from '$declarations/contract/contract.did';
-	import CreateShipmentForm from '../components/CreateShipment.svelte';
+	import CreateShipmentForm from '../components/forms/CreateShipment.svelte';
 	import Marker from '../components/Marker.svelte';
 	import Modal from '../components/modal/Modal.svelte';
 	import ShipmentInfo from '../components/ShipmentInfo.svelte';
@@ -65,8 +65,7 @@
 		if (!$wallet.connected) return;
 
 		const fee = await wallet.getTransferFee();
-		wallet.approve(shipment.info.value + fee);
-
+		await wallet.approve(shipment.info.value + fee);
 		const error = await $wallet.actor.buyShipment('Jacek', shipment.id);
 		console.log(error);
 
@@ -85,7 +84,7 @@
 		if (!$wallet.connected) return;
 
 		const error = await $wallet.actor.finalizeShipment(shipment.id, []);
-		console.log(error);
+		console.log('Settle:', error);
 
 		await invalidateAll();
 
