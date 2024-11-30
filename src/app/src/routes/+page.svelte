@@ -13,7 +13,8 @@
 	import TextInput from '../components/common/Inputs/TextInput.svelte';
 	import { Principal } from '@dfinity/principal';
 	import MapButton from '../components/MapButton.svelte';
-	import QrCodeDisplay from 'src/components/QrCodeDisplay.svelte';
+	import PillButton from '../components/common/PillButton.svelte';
+	import SettleShipment from '../components/forms/SettleShipment.svelte';
 	// import * as vetkd from 'ic-vetkd-utils';
 
 	onMount(async () => {
@@ -141,27 +142,7 @@
 
 	<Modal bind:showModal={showBuyModal} cls="w-[1000px]" onClose={() => (showBuyModal = false)}>
 		{#if selected}
-			<div class="flex justify-between w-full mx-5">
-				<div class="flex flex-col">
-					<ShipmentInfo shipment={selected} />
-
-					<button
-						class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-7 py-2 w-1/2 mx-auto text-white text-base transition ease-in-out hover:-translate-y-0.5 hover:scale-105 duration-200"
-						onclick={() => settle(selected!)}
-					>
-						Settle
-					</button>
-				</div>
-				<div class="flex items-center text-lg">OR</div>
-				<div class="flex items-center">
-					{#if selected}
-						<QrCodeDisplay
-							settleId={selected.id}
-							settleSecret={getLocalStorage(selected.id.toString())}
-						/>
-					{/if}
-				</div>
-			</div>
+			<SettleShipment {selected} onSettle={settle} />
 		{/if}
 	</Modal>
 
@@ -194,12 +175,7 @@
 
 		<TextInput id="Message" label="Message" name="Message" bind:value={message} />
 
-		<button
-			onclick={() => buy(selected!)}
-			class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-7 py-2 w-1/2 mx-auto text-white text-base transition ease-in-out hover:-translate-y-0.5 hover:scale-105 duration-200"
-		>
-			Buy
-		</button>
+		<PillButton onClick={() => buy(selected!)} text="Buy" className="w-1/2 mx-auto" />
 	</Modal>
 
 	<MapButton bind:showModal={showAddModal} />
