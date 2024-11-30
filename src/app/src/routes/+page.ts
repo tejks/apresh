@@ -23,21 +23,21 @@ export async function load({ url }: LoadEvent): Promise<{
 	let carried: Shipment[] = [];
 	let created: Shipment[] = [];
 
-	// if (stateWallet.actor) {
-	// 	console.log('Wallet connected');
+	if (stateWallet.actor) {
+		console.log('Wallet connected');
 
-	// 	// const [car, cus] = await stateWallet.actor.roles();
-	// 	// registeredCarrier = car;
-	// 	// registeredCustomer = cus;
+		// const [car, cus] = await stateWallet.actor.roles();
+		// registeredCarrier = car;
+		// registeredCustomer = cus;
 
-	// 	// if (registeredCarrier) {
-	// 	console.log('Carrier registered');
+		// if (registeredCarrier) {
+		console.log('Carrier registered');
 
-	// 	let [car, cus] = await stateWallet.actor.listUserShipments();
-	// 	carried = car;
-	// 	created = cus;
-	// 	// }
-	// }
+		let [car, cus] = await stateWallet.actor.listUserShipments();
+		carried = car;
+		created = cus;
+		// }
+	}
 
 	console.log('Shipments:', shipments);
 	console.log('carried:', carried);

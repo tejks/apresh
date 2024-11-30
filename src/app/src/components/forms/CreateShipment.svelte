@@ -4,9 +4,9 @@
 	import { wallet } from '$lib/wallet.svelte';
 	import { sha256 } from 'js-sha256';
 	import { MapEvents, Marker } from 'svelte-maplibre';
-	import DecimalInput from './common/Inputs/DecimalInput.svelte';
-	import TextInput from './common/Inputs/TextInput.svelte';
-	import Modal from './modal/Modal.svelte';
+	import DecimalInput from '../common/Inputs/DecimalInput.svelte';
+	import TextInput from '../common/Inputs/TextInput.svelte';
+	import Modal from '../modal/Modal.svelte';
 
 	interface ShipmentProps {
 		showModal: boolean;
