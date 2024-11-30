@@ -8,6 +8,7 @@
 	import TextInput from '../common/Inputs/TextInput.svelte';
 	import Modal from '../modal/Modal.svelte';
 	import * as Tabs from '$lib/components/ui/tabs';
+	import { createEventDispatcher } from 'svelte';
 
 	interface ShipmentProps {
 		showModal: boolean;
@@ -19,7 +20,7 @@
 	let source = $state({ lat: 0, lng: 0, street: '' });
 	let destination = $state({ lat: 0, lng: 0, street: '' });
 	let value = $state(0);
-	let size_category: string = 'Parcel';
+	let size_category: 'Parcel' | 'Envelope' = $state('Parcel');
 	let max_height = $state(0);
 	let max_width = $state(0);
 	let max_depth = $state(0);
@@ -120,6 +121,11 @@
 		price = 0;
 		name = '';
 	}
+
+	const dispatch = createEventDispatcher();
+	const onBackdropClick = () => {
+		dispatch('backdropClick');
+	};
 </script>
 
 {#if isSelectMode}
@@ -132,9 +138,9 @@
 			clearData();
 		}}
 	>
-		<form method="POST" class="flex flex-col space-y-7 w-full" onsubmit={createShipment}>
+		<form method="POST" class="flex w-full flex-col space-y-7" onsubmit={createShipment}>
 			<h1
-				class="text-3xl text-center font-semibold inline-block bg-gradient-to-r from-blue-500 to-rose-400 bg-clip-text text-transparent mb-5"
+				class="mb-5 inline-block bg-gradient-to-r from-blue-500 to-rose-400 bg-clip-text text-center text-3xl font-semibold text-transparent"
 			>
 				Create shipment
 			</h1>
@@ -143,12 +149,12 @@
 			<DecimalInput label="Value" id="value" name="value" bind:value required />
 			<DecimalInput label="Price" id="price" name="price" bind:value={price} required />
 
-			<div class="flex justify-between px-10 my-8">
-				<div class="flex flex-col text-center space-y-2">
+			<div class="my-8 flex justify-between px-10">
+				<div class="flex flex-col space-y-2 text-center">
 					<span>Source</span>
 					{#if !source.street}
 						<button
-							class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-4 py-1 mx-auto text-white transition ease-in-out hover:-translate-y-0.5 hover:scale-105 duration-200"
+							class="mx-auto rounded-full bg-gradient-to-r from-blue-500 to-rose-400 px-4 py-1 text-white transition duration-200 ease-in-out hover:-translate-y-0.5 hover:scale-105"
 							onclick={selectSource}>Select location</button
 						>
 					{:else}
@@ -157,11 +163,11 @@
 						>
 					{/if}
 				</div>
-				<div class="flex flex-col text-center space-y-2">
+				<div class="flex flex-col space-y-2 text-center">
 					<span>Destination</span>
 					{#if !destination.street}
 						<button
-							class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-4 py-1 mx-auto text-white transition ease-in-out hover:-translate-y-0.5 hover:scale-105 duration-200"
+							class="mx-auto rounded-full bg-gradient-to-r from-blue-500 to-rose-400 px-4 py-1 text-white transition duration-200 ease-in-out hover:-translate-y-0.5 hover:scale-105"
 							onclick={selectDestination}>Select location</button
 						>
 					{:else}
@@ -174,7 +180,7 @@
 
 			<Tabs.Root
 				value={size_category ?? 'Parcel'}
-				onValueChange={(value) => (size_category = value!)}
+				onValueChange={(value) => (size_category = value as 'Parcel' | 'Envelope')}
 				class="w-full"
 			>
 				<Tabs.List class="grid w-full grid-cols-2">
@@ -208,7 +214,7 @@
 
 			<button
 				type="submit"
-				class="bg-gradient-to-r from-blue-500 to-rose-400 rounded-full px-7 py-2 w-3/5 mx-auto text-white text-base transition ease-in-out hover:-translate-y-0.5 hover:scale-105 duration-200"
+				class="mx-auto w-3/5 rounded-full bg-gradient-to-r from-blue-500 to-rose-400 px-7 py-2 text-base text-white transition duration-200 ease-in-out hover:-translate-y-0.5 hover:scale-105"
 				>Create Shipment</button
 			>
 		</form>
@@ -217,7 +223,7 @@
 
 {#if source.street && (isSelectMode || showModal)}
 	<Marker lngLat={[source.lng, source.lat]}>
-		<div class="relative pin bounce-a cursor-pointer active"></div>
+		<div class="pin bounce-a active relative cursor-pointer"></div>
 
 		<!-- <div
 			class="absolute -top-10 left-10 text-center bg-white rounded-lg px-3 py-2 flex items-center font-bold text-lg"
@@ -229,7 +235,7 @@
 
 {#if destination.street && (isSelectMode || showModal)}
 	<Marker lngLat={[destination.lng, destination.lat]}>
-		<div class="pin bounce-a cursor-pointer active"></div>
+		<div class="pin bounce-a active cursor-pointer"></div>
 
 		<!-- <div class="relative">
 			<div

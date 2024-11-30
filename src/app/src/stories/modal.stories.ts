@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/svelte';
-import Modal from './Modal.svelte';
+import Modal from '$components/modal/Modal.svelte';
 import { createRawSnippet } from 'svelte';
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories
