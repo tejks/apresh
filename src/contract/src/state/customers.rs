@@ -1,8 +1,8 @@
 use crate::impl_deref;
-use crate::models::customer::{self, Customer, CustomerId};
+use crate::actors::customer::{Customer, CustomerId};
 use std::collections::HashMap;
 
-type CustomersStore = HashMap<customer::CustomerId, customer::Customer>;
+type CustomersStore = HashMap<CustomerId, Customer>;
 
 #[derive(Default)]
 pub struct Customers(CustomersStore);

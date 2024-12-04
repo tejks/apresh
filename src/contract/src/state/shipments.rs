@@ -1,6 +1,6 @@
+use crate::actors::{carrier::CarrierId, customer::CustomerId};
 use crate::impl_deref;
-use crate::models::shipment::ShipmentStatus;
-use crate::models::{carrier, customer::CustomerId, shipment::Shipment};
+use crate::models::shipment::{Shipment, ShipmentStatus};
 use std::collections::HashMap;
 
 type ShipmentsStore = HashMap<u64, Shipment>;
@@ -23,7 +23,7 @@ impl Shipments {
             .collect()
     }
 
-    pub fn list_for_shipper(&self, carrier_id: &carrier::CarrierId) -> Vec<&Shipment> {
+    pub fn list_for_shipper(&self, carrier_id: &CarrierId) -> Vec<&Shipment> {
         self.values()
             .filter(|shipment| shipment.carrier_id() == Some(*carrier_id))
             .collect()

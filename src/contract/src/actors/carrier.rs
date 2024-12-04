@@ -1,7 +1,7 @@
 use candid::Principal;
 use serde::{Deserialize, Serialize};
 
-use super::shipment::ShipmentId;
+use crate::models::shipment::ShipmentId;
 
 pub type CarrierId = Principal;
 

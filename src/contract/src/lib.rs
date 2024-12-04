@@ -4,6 +4,7 @@ mod state;
 mod transfer;
 mod utils;
 mod vetkd;
+mod actors;
 
 use anyhow::anyhow;
 use candid::Principal;

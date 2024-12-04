@@ -1,4 +1,4 @@
-use super::{carrier::Carrier, customer::Customer};
+use crate::actors::{carrier::Carrier, customer::Customer};
 use anyhow::Context;
 use candid::{CandidType, Principal};
 use hex::FromHex;

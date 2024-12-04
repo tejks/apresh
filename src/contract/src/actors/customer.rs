@@ -1,6 +1,7 @@
-use super::shipment::ShipmentId;
 use candid::Principal;
 use serde::{Deserialize, Serialize};
+
+use crate::models::shipment::ShipmentId;
 
 pub type CustomerId = Principal;
 
