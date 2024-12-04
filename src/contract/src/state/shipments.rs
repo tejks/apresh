@@ -1,44 +1,31 @@
-use std::{collections::HashMap, ops::{Deref, DerefMut}};
-use crate::models::{shipment, shipment_id, carrier, customer::CustomerId};
+use crate::impl_deref;
+use crate::models::shipment::ShipmentStatus;
+use crate::models::{carrier, customer::CustomerId, shipment::Shipment};
+use std::collections::HashMap;
 
-type ShipmentsStore = HashMap<shipment_id::ShipmentIdInner, shipment::Shipment>;
+type ShipmentsStore = HashMap<u64, Shipment>;
 
 #[derive(Default)]
 pub struct Shipments(ShipmentsStore);
 
-impl Deref for Shipments {
-    type Target = ShipmentsStore;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for Shipments {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
+impl_deref!(Shipments, ShipmentsStore);
 
 impl Shipments {
-    pub fn get_all_pending(&self) -> Vec<shipment::Shipment> {
+    pub fn list_pending(&self) -> Vec<&Shipment> {
         self.values()
-            .filter(|shipment| *shipment.status() == shipment::ShipmentStatus::Pending)
-            .cloned()
+            .filter(|shipment| *shipment.status() == ShipmentStatus::Pending)
             .collect()
     }
 
-    pub fn get_all_for_customer(&self, customer_id: &CustomerId) -> Vec<shipment::Shipment> {
+    pub fn list_for_customer(&self, customer_id: &CustomerId) -> Vec<&Shipment> {
         self.values()
             .filter(|shipment| shipment.customer_id() == *customer_id)
-            .cloned()
             .collect()
     }
 
-    pub fn get_all_for_shipper(&self, carrier_id: &carrier::CarrierId) -> Vec<shipment::Shipment> {
+    pub fn list_for_shipper(&self, carrier_id: &carrier::CarrierId) -> Vec<&Shipment> {
         self.values()
             .filter(|shipment| shipment.carrier_id() == Some(*carrier_id))
-            .cloned()
             .collect()
     }
 }

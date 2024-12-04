@@ -1,9 +1,11 @@
-use super::{carrier::Carrier, customer::Customer, shipment_id::ShipmentIdInner};
+use super::{carrier::Carrier, customer::Customer};
 use anyhow::Context;
 use candid::{CandidType, Principal};
 use hex::FromHex;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
+
+pub type ShipmentId = u64;
 
 #[derive(Deserialize, Serialize, Debug, Clone, CandidType)]
 pub enum SizeCategory {
@@ -73,7 +75,7 @@ pub enum ShipmentStatus {
 
 #[derive(Deserialize, Serialize, Debug, Clone, CandidType)]
 pub struct Shipment {
-    id: ShipmentIdInner,
+    id: ShipmentId,
     name: String,
     hashed_secret: String,
     info: ShipmentInfo,
@@ -95,7 +97,7 @@ impl Shipment {
 
     pub fn create(
         creator: &mut Customer,
-        id: ShipmentIdInner,
+        id: ShipmentId,
         hashed_secret: String,
         name: String,
         info: ShipmentInfo,
@@ -183,7 +185,7 @@ impl Shipment {
         self.carrier
     }
 
-    pub fn id(&self) -> ShipmentIdInner {
+    pub fn id(&self) -> ShipmentId {
         self.id
     }
 

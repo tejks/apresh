@@ -1,4 +1,5 @@
-use std::{collections::HashMap, ops::{Deref, DerefMut}};
+use std::collections::HashMap;
+use crate::impl_deref;
 use crate::models::carrier;
 
 type CarriersStore = HashMap<carrier::CarrierId, carrier::Carrier>;
@@ -6,19 +7,7 @@ type CarriersStore = HashMap<carrier::CarrierId, carrier::Carrier>;
 #[derive(Default)]
 pub struct Carriers(CarriersStore);
 
-impl Deref for Carriers {
-    type Target = CarriersStore;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for Carriers {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
+impl_deref!(Carriers, CarriersStore);
 
 impl Carriers {
     pub fn get_or_create(

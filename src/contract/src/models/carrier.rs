@@ -1,6 +1,7 @@
-use super::shipment_id::ShipmentIdInner;
 use candid::Principal;
 use serde::{Deserialize, Serialize};
+
+use super::shipment::ShipmentId;
 
 pub type CarrierId = Principal;
 
@@ -9,7 +10,7 @@ pub struct Carrier {
     id: CarrierId,
     name: String,
     shipments_done: u32,
-    shipments: Vec<ShipmentIdInner>,
+    shipments: Vec<ShipmentId>,
 }
 
 impl Carrier {
@@ -22,11 +23,11 @@ impl Carrier {
         }
     }
 
-    pub fn add_shipment(&mut self, shipment_id: ShipmentIdInner) {
+    pub fn add_shipment(&mut self, shipment_id: ShipmentId) {
         self.shipments.push(shipment_id);
     }
 
-    pub fn finalize_shipment(&mut self, shipment_id: ShipmentIdInner) {
+    pub fn finalize_shipment(&mut self, shipment_id: ShipmentId) {
         self.shipments.retain(|&x| x != shipment_id);
         self.shipments_done += 1;
     }
@@ -39,7 +40,7 @@ impl Carrier {
         &self.name
     }
 
-    pub fn shipments(&self) -> &[ShipmentIdInner] {
+    pub fn shipments(&self) -> &[ShipmentId] {
         &self.shipments
     }
 

@@ -1,4 +1,4 @@
-use super::shipment_id::ShipmentIdInner;
+use super::shipment::ShipmentId;
 use candid::Principal;
 use serde::{Deserialize, Serialize};
 
@@ -9,7 +9,7 @@ pub struct Customer {
     id: CustomerId,
     name: String,
     shipments_sent: u32,
-    shipments: Vec<ShipmentIdInner>,
+    shipments: Vec<ShipmentId>,
 }
 
 impl Customer {
@@ -22,11 +22,11 @@ impl Customer {
         }
     }
 
-    pub fn add_shipment(&mut self, shipment_id: ShipmentIdInner) {
+    pub fn add_shipment(&mut self, shipment_id: ShipmentId) {
         self.shipments.push(shipment_id);
     }
 
-    pub fn finalize_shipment(&mut self, shipment_id: ShipmentIdInner) {
+    pub fn finalize_shipment(&mut self, shipment_id: ShipmentId) {
         self.shipments.retain(|&x| x != shipment_id);
         self.shipments_sent += 1;
     }
@@ -39,7 +39,7 @@ impl Customer {
         &self.name
     }
 
-    pub fn shipments(&self) -> &[ShipmentIdInner] {
+    pub fn shipments(&self) -> &[ShipmentId] {
         &self.shipments
     }
 }

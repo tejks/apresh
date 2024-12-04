@@ -2,15 +2,24 @@ mod carriers;
 mod customers;
 mod shipments;
 
-pub use carriers::Carriers;
-pub use customers::Customers;
-pub use shipments::Shipments;
+#[macro_use]
+pub(crate) mod macros;
+
+use carriers::Carriers;
+use customers::Customers;
+use shipments::Shipments;
 
 use std::cell::RefCell;
 
+#[derive(Default)]
+pub struct CanisterState {
+    pub customers: Customers,
+    pub carriers: Carriers,
+    pub shipments: Shipments,
+    pub shipment_counter: u64,
+}
+
+
 thread_local! {
-    pub static CUSTOMERS: RefCell<Customers> = Default::default();
-    pub static SHIPMENT_COUNTER: RefCell<u64> = Default::default();
-    pub static SHIPMENTS: RefCell<Shipments> = Default::default();
-    pub static CARRIERS: RefCell<Carriers> = Default::default();
+    pub static STATE: RefCell<CanisterState> = Default::default();
 }

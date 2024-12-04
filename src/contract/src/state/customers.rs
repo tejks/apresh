@@ -1,24 +1,13 @@
-use std::{collections::HashMap, ops::{Deref, DerefMut}};
+use crate::impl_deref;
 use crate::models::customer::{self, Customer, CustomerId};
+use std::collections::HashMap;
 
 type CustomersStore = HashMap<customer::CustomerId, customer::Customer>;
 
 #[derive(Default)]
 pub struct Customers(CustomersStore);
 
-impl Deref for Customers {
-    type Target = CustomersStore;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for Customers {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
+impl_deref!(Customers, CustomersStore);
 
 impl Customers {
     pub fn get_or_create(
