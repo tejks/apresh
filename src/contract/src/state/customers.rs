@@ -12,13 +12,13 @@ impl_deref!(Customers, CustomersStore);
 impl Customers {
     pub fn get_or_create(
         &mut self,
-        customer_name: String,
+        customer_name: &str,
         customer_id: CustomerId,
     ) -> &mut Customer {
         let customer_exists = self.get_mut(&customer_id).is_some();
 
         if !customer_exists {
-            let customer = Customer::new(customer_id, customer_name);
+            let customer = Customer::new(customer_id, customer_name.to_string());
             self.insert(customer_id, customer);
         }
 

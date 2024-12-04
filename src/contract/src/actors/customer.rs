@@ -3,44 +3,48 @@ use serde::{Deserialize, Serialize};
 
 use crate::models::shipment::ShipmentId;
 
+use super::{base::ActorBase, Actor, ActorRole};
+
 pub type CustomerId = Principal;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Customer {
-    id: CustomerId,
-    name: String,
-    shipments_sent: u32,
-    shipments: Vec<ShipmentId>,
+    base: ActorBase,
 }
 
 impl Customer {
     pub fn new(id: CustomerId, name: String) -> Self {
-        Self {
-            id,
-            name,
-            shipments: vec![],
-            shipments_sent: 0,
-        }
+        Self { base: ActorBase::new(id, name) }
+    }
+}
+
+impl Actor for Customer {
+    
+    fn id(&self) -> Principal {
+        self.base.id()
     }
 
-    pub fn add_shipment(&mut self, shipment_id: ShipmentId) {
-        self.shipments.push(shipment_id);
+    fn role(&self) -> ActorRole {
+        ActorRole::Customer
     }
 
-    pub fn finalize_shipment(&mut self, shipment_id: ShipmentId) {
-        self.shipments.retain(|&x| x != shipment_id);
-        self.shipments_sent += 1;
+    fn name(&self) -> &str {
+        self.base.name()
     }
 
-    pub fn id(&self) -> Principal {
-        self.id
+    fn active_shipments(&self) -> &[ShipmentId] {
+        &self.base.active_shipments()
     }
 
-    pub fn name(&self) -> &str {
-        &self.name
+    fn shipments_history(&self) -> &[ShipmentId] {
+        &self.base.shipments_history()
     }
 
-    pub fn shipments(&self) -> &[ShipmentId] {
-        &self.shipments
+    fn archive_shipment(&mut self, shipment_id: ShipmentId) {
+        self.base.archive_shipment(shipment_id);
+    }
+
+    fn add_shipment(&mut self, shipment_id: ShipmentId) {
+        self.base.add_shipment(shipment_id);
     }
 }

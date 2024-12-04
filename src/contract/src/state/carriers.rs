@@ -10,10 +10,10 @@ pub struct Carriers(CarriersStore);
 impl_deref!(Carriers, CarriersStore);
 
 impl Carriers {
-    pub fn get_or_create(
+    pub fn get_or_create<'a>(
         &mut self,
         carrier_id: CarrierId,
-        carrier_name: String,
+        carrier_name: &'a str,
     ) -> &mut Carrier {
         let carrier_exists = self.get_mut(&carrier_id).is_some();
 

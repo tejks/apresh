@@ -1,4 +1,8 @@
-use crate::actors::{carrier::Carrier, customer::Customer};
+use crate::actors::{
+    carrier::{Carrier, CarrierId},
+    customer::{Customer, CustomerId},
+    Actor,
+};
 use anyhow::Context;
 use candid::{CandidType, Principal};
 use hex::FromHex;
@@ -96,32 +100,30 @@ impl Shipment {
     }
 
     pub fn create(
-        creator: &mut Customer,
+        timestamp: u64,
+        customer: CustomerId,
         id: ShipmentId,
-        hashed_secret: String,
-        name: String,
+        hashed_secret: &str,
+        name: &str,
         info: ShipmentInfo,
     ) -> Self {
-        let created_at = ic_cdk::api::time();
-
-        creator.add_shipment(id);
-
+   
         let shipment = Self {
             id,
             info,
-            name,
+            name: name.to_string(),
             message: None,
-            hashed_secret,
+            hashed_secret: hashed_secret.to_string(),
             status: ShipmentStatus::Pending,
             carrier: None,
-            customer: creator.id(),
-            created_at,
+            customer,
+            created_at: timestamp,
         };
 
         shipment
     }
 
-    fn validate_secret(&self, secret: Option<String>) -> anyhow::Result<()> {
+    fn validate_secret(&self, secret: Option<&str>) -> anyhow::Result<()> {
         let secret = secret.ok_or(anyhow::anyhow!("missing secret"))?;
         let hex = Vec::from_hex(self.hashed_secret.clone()).context("invalid hex")?;
 
@@ -136,13 +138,7 @@ impl Shipment {
         }
     }
 
-    pub fn finalize(
-        &mut self,
-        carrier: &mut Carrier,
-        customer: &mut Customer,
-        secret_key: Option<String>,
-        caller: Principal,
-    ) -> anyhow::Result<()> {
+    pub fn finalize(&mut self, secret_key: Option<&str>, caller: Principal) -> anyhow::Result<()> {
         if self.status != ShipmentStatus::InTransit {
             return Err(anyhow::anyhow!("shipment is not ready to be finalized"));
         }
@@ -154,21 +150,20 @@ impl Shipment {
 
         self.status = ShipmentStatus::Delivered;
 
-        carrier.finalize_shipment(self.id());
-        customer.finalize_shipment(self.id());
-
         Ok(())
     }
 
-    pub fn buy(&mut self, carrier: &mut Carrier) -> anyhow::Result<()> {
+    pub fn assign_carrier(&mut self, carrier_id: CarrierId) {
+        self.carrier = Some(carrier_id);
+        self.status = ShipmentStatus::InTransit;
+    }
+
+    pub fn buy(&mut self, carrier_id: CarrierId) -> anyhow::Result<()> {
         if self.status != ShipmentStatus::Pending {
             return Err(anyhow::anyhow!("shipment is not pending"));
         }
 
-        self.carrier = Some(carrier.id());
-        self.status = ShipmentStatus::InTransit;
-
-        carrier.add_shipment(self.id());
+        self.assign_carrier(carrier_id);
 
         Ok(())
     }
@@ -187,6 +182,10 @@ impl Shipment {
 
     pub fn id(&self) -> ShipmentId {
         self.id
+    }
+
+    pub fn name(&self) -> &str {
+        &self.name
     }
 
     pub fn info(&self) -> &ShipmentInfo {

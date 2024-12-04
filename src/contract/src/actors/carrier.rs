@@ -1,50 +1,47 @@
+use super::{base::ActorBase, Actor, ActorRole};
+use crate::models::shipment::ShipmentId;
 use candid::Principal;
 use serde::{Deserialize, Serialize};
-
-use crate::models::shipment::ShipmentId;
 
 pub type CarrierId = Principal;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Carrier {
-    id: CarrierId,
-    name: String,
-    shipments_done: u32,
-    shipments: Vec<ShipmentId>,
+    base: ActorBase,
 }
 
 impl Carrier {
-    pub fn new(id: CarrierId, name: String) -> Self {
-        Self {
-            id,
-            name,
-            shipments: vec![],
-            shipments_done: 0,
-        }
+    pub fn new(id: CarrierId, name: &str) -> Self {
+        Self { base: ActorBase::new(id, name.to_string()) }
+    }
+}
+
+impl Actor for Carrier {
+    fn id(&self) -> Principal {
+        self.base.id()
     }
 
-    pub fn add_shipment(&mut self, shipment_id: ShipmentId) {
-        self.shipments.push(shipment_id);
+    fn role(&self) -> ActorRole {
+        ActorRole::Carrier
     }
 
-    pub fn finalize_shipment(&mut self, shipment_id: ShipmentId) {
-        self.shipments.retain(|&x| x != shipment_id);
-        self.shipments_done += 1;
-    }
-    
-    pub fn id(&self) -> Principal {
-        self.id
+    fn name(&self) -> &str {
+        &self.base.name()
     }
 
-    pub fn name(&self) -> &str {
-        &self.name
+    fn active_shipments(&self) -> &[ShipmentId] {
+        &self.base.active_shipments()
     }
 
-    pub fn shipments(&self) -> &[ShipmentId] {
-        &self.shipments
+    fn shipments_history(&self) -> &[ShipmentId] {
+        &self.base.shipments_history()
     }
 
-    pub fn shipments_done(&self) -> u32 {
-        self.shipments_done
+    fn add_shipment(&mut self, shipment_id: ShipmentId) {
+        self.base.add_shipment(shipment_id);
+    }
+
+    fn archive_shipment(&mut self, shipment_id: ShipmentId) {
+        self.base.archive_shipment(shipment_id);
     }
 }
