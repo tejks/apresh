@@ -1,12 +1,12 @@
 use super::{CanisterState, StateOp};
 
 use crate::{
-    actors::{customer::CustomerId, Actor},
+    actors::{shipper::{Shipper, ShipperId}, Actor},
     models::shipment::{Shipment, ShipmentId, ShipmentInfo},
 };
 
 pub struct CreateShipmentOp<'a> {
-    creator_id: CustomerId,
+    creator_id: ShipperId,
     creator_name: &'a str,
     hashed_secret: &'a str,
     shipment_name: &'a str,
@@ -16,7 +16,7 @@ pub struct CreateShipmentOp<'a> {
 
 impl<'a> CreateShipmentOp<'a> {
     pub fn new(
-        creator_id: CustomerId,
+        creator_id: ShipperId,
         creator_name: &'a str,
         hashed_secret: &'a str,
         shipment_name: &'a str,
@@ -35,17 +35,22 @@ impl<'a> CreateShipmentOp<'a> {
 }
 
 impl StateOp<ShipmentId> for CreateShipmentOp<'_> {
+    type Error = anyhow::Error;
+
     fn apply(&self, state: &mut CanisterState) -> Result<ShipmentId, anyhow::Error> {
         let new_shipment_id = state.shipment_counter;
         state.shipment_counter += 1;
 
-        let customer = state
-            .customers
-            .get_or_create(&self.creator_name, self.creator_id);
+        let shipper = match state
+            .shippers
+            .get_mut(&self.creator_id) {
+                Some(shipper) => shipper,
+                None => state.shippers.create(self.creator_id, Shipper::new(self.creator_id, self.creator_name)),
+            };
 
-        let shipment = Shipment::create(
+        let shipment = Shipment::new(
             self.timestamp,
-            customer.id(),
+            shipper.id(),
             new_shipment_id,
             self.hashed_secret,
             self.shipment_name,
@@ -53,7 +58,7 @@ impl StateOp<ShipmentId> for CreateShipmentOp<'_> {
         );
 
         state.shipments.insert(new_shipment_id, shipment);
-        customer.add_shipment(new_shipment_id);
+        shipper.add_shipment(new_shipment_id);
 
         Ok(new_shipment_id)
     }
@@ -61,9 +66,10 @@ impl StateOp<ShipmentId> for CreateShipmentOp<'_> {
 
 #[cfg(test)]
 mod tests {
+    use crate::models::shipment::{ShipmentLocation, SizeCategory};
+
     use super::*;
     use candid::Principal;
-    use crate::models::shipment::{ShipmentInfo, ShipmentLocation, SizeCategory};
 
     #[test]
     fn test_create_shipment_success() {
@@ -103,13 +109,13 @@ mod tests {
         assert_eq!(state.shipment_counter, 1);
 
         let shipment = state.shipments.get(&shipment_id).unwrap();
-        assert_eq!(shipment.customer_id(), creator_id);
+        assert_eq!(shipment.shipper_id(), creator_id);
         assert_eq!(shipment.id(), shipment_id);
         assert_eq!(shipment.name(), shipment_name);
 
-        let customer = state.customers.get(&creator_id).unwrap();
-        assert_eq!(customer.id(), creator_id);
-        assert!(customer.active_shipments().contains(&shipment_id));
-        assert_eq!(customer.name(), creator_name);
+        let shipper = state.shippers.get(&creator_id).unwrap();
+        assert_eq!(shipper.id(), creator_id);
+        assert!(shipper.get_active_shipments().contains(&shipment_id));
+        assert_eq!(shipper.name(), creator_name);
     }
 }

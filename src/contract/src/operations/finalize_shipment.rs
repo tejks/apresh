@@ -1,7 +1,7 @@
 use super::StateOp;
 use crate::{
     actors::{carrier::CarrierId, Actor},
-    models::shipment::ShipmentId,
+    models::shipment::{ShipmentActions, ShipmentId},
     state::CanisterState,
 };
 use anyhow::anyhow;
@@ -44,6 +44,8 @@ impl<'a> FinalizeShipmentOp<'a> {
 }
 
 impl<'a> StateOp<FinalizeShipmentResult> for FinalizeShipmentOp<'a> {
+    type Error = anyhow::Error;
+
     fn apply(&self, state: &mut CanisterState) -> Result<FinalizeShipmentResult, anyhow::Error> {
         let shipment = state
             .shipments
@@ -55,7 +57,10 @@ impl<'a> StateOp<FinalizeShipmentResult> for FinalizeShipmentOp<'a> {
             .get_mut(&shipment.carrier_id().ok_or(anyhow!("Carrier not set"))?)
             .ok_or(anyhow!("Carrier not found"))?;
 
-        shipment.finalize(self.secret_key, self.caller)?;
+        shipment.action(ShipmentActions::MarkDelivered {
+            secret_key: self.secret_key,
+            caller: self.caller,
+        })?;
 
         Ok(FinalizeShipmentResult {
             carrier_id: carrier.id(),

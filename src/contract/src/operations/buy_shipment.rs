@@ -1,5 +1,12 @@
 use super::StateOp;
-use crate::{actors::carrier::CarrierId, models::shipment::ShipmentId, state::CanisterState};
+use crate::{
+    actors::{
+        carrier::{Carrier, CarrierId},
+        Actor,
+    },
+    models::shipment::{ShipmentActions, ShipmentId},
+    state::CanisterState,
+};
 use anyhow::anyhow;
 
 pub type Cost = u64;
@@ -21,19 +28,24 @@ impl<'a> BuyShipmentOp<'a> {
 }
 
 impl<'a> StateOp<Cost> for BuyShipmentOp<'a> {
-    fn apply(&self, state: &mut CanisterState) -> Result<Cost, anyhow::Error> {
-        state
-            .carriers
-            .contains_key(&self.carrier_id)
-            .then_some(self.carrier_id)
-            .ok_or(anyhow!("Carrier not found"))?;
+    type Error = anyhow::Error;
+
+    fn apply(&self, state: &mut CanisterState) -> Result<Cost, Self::Error> {
+        let carrier = match state.carriers.get_mut(&self.carrier_id) {
+            Some(carrier) => carrier,
+            None => state.carriers.create(
+                self.carrier_id,
+                Carrier::new(self.carrier_id, self.carrier_name),
+            ),
+        };
 
         let shipment = state
             .shipments
             .get_mut(&self.shipment_id)
             .ok_or(anyhow!("Shipment not found"))?;
 
-        shipment.buy(self.carrier_id)?;
+        shipment.action(ShipmentActions::Buy(self.carrier_id))?;
+        carrier.add_shipment(self.shipment_id);
 
         Ok(shipment.info().value())
     }

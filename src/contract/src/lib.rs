@@ -12,9 +12,9 @@ use ic_cdk::{query, update};
 use icrc_ledger_types::icrc1::transfer::NumTokens;
 use models::{
     qrcode::QrCodeOptions,
-    shipment::{Shipment, ShipmentInfo},
+    shipment::{Shipment, ShipmentInfo, ShipmentStatus},
 };
-use operations::{BuyShipmentOp, CreateShipmentOp, FinalizeShipmentOp, StateOp};
+use operations::{AddMessageOp, BuyShipmentOp, CreateShipmentOp, FinalizeShipmentOp, ReadMessageOp, StateOp};
 use state::STATE;
 use transfer::{transfer_in, transfer_out, TransferInParams, TransferOutParams, TransferParams};
 use utils::block_anonymous;
@@ -25,34 +25,18 @@ pub use vetkd::{encrypted_ibe_decryption_key_for_caller, ibe_encryption_key};
 async fn add_encrypted_message(message: String, shipment_id: u64) -> Result<(), String> {
     let caller: Principal = ic_cdk::caller();
 
-    STATE.with_borrow_mut(|state| {
-        if let Some(shipment) = state.shipments.get_mut(&shipment_id) {
-            if shipment.carrier_id().is_some_and(|v| v == caller) {
-                Ok(shipment.add_encrypted_message(message))
-            } else {
-                Err("Only the carrier can add an encrypted message".to_string())
-            }
-        } else {
-            Err("Shipment not found".to_string())
-        }
-    })
+    STATE
+        .with_borrow_mut(|state| AddMessageOp::new(shipment_id, &message, caller).apply(state))
+        .map_err(|e| e.to_string())
 }
 
 #[update(name = "readEncryptedMessage")]
 async fn read_encrypted_message(shipment_id: u64) -> Result<Option<String>, String> {
     let caller: Principal = ic_cdk::caller();
 
-    STATE.with_borrow(|state| {
-        if let Some(shipment) = state.shipments.get(&shipment_id) {
-            if shipment.customer_id() == caller {
-                Ok(shipment.encrypted_message())
-            } else {
-                Err("Only the customer can read an encrypted message".to_string())
-            }
-        } else {
-            Err("Shipment not found".to_string())
-        }
-    })
+    STATE
+        .with_borrow_mut(|state| ReadMessageOp::new(shipment_id, caller).apply(state))
+        .map_err(|e| e.to_string())
 }
 
 #[update(name = "finalizeShipment")]
@@ -176,8 +160,8 @@ fn get_pending_shipments() -> Vec<Shipment> {
     STATE.with_borrow(|state| {
         state
             .shipments
-            .list_pending()
-            .into_iter()
+            .values()
+            .filter(|shipment| *shipment.status() == ShipmentStatus::Created)
             .cloned()
             .collect()
     })
@@ -190,32 +174,32 @@ fn get_user_shipments() -> (Vec<Shipment>, Vec<Shipment>) {
     let shippers = STATE.with_borrow(|state| {
         state
             .shipments
-            .list_for_shipper(&customer_id)
-            .into_iter()
+            .values()
+            .filter(|shipment| shipment.shipper_id() == customer_id)
             .cloned()
             .collect()
     });
 
-    let customers = STATE.with_borrow(|state| {
+    let carriers = STATE.with_borrow(|state| {
         state
             .shipments
-            .list_for_customer(&customer_id)
-            .into_iter()
+            .values()
+            .filter(|shipment| shipment.carrier_id() == Some(customer_id))
             .cloned()
             .collect()
     });
 
-    (shippers, customers)
+    (shippers, carriers)
 }
 
 #[query]
 fn roles() -> (bool, bool) {
     let caller = ic_cdk::caller();
 
-    let carrier = STATE.with_borrow(|state| state.carriers.contains_key(&caller));
-    let customer = STATE.with_borrow(|state| state.customers.contains_key(&caller));
+    let carrier = STATE.with_borrow(|state| state.carriers.get(&caller).is_some());
+    let shipper = STATE.with_borrow(|state| state.shippers.get(&caller).is_some());
 
-    (carrier, customer)
+    (carrier, shipper)
 }
 
 #[query]
