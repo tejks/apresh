@@ -9,6 +9,7 @@
 	import Modal from '../modal/Modal.svelte';
 	import * as Tabs from '$lib/components/ui/tabs';
 	import { createEventDispatcher } from 'svelte';
+	import PillButton from '$components/common/PillButton.svelte';
 
 	interface ShipmentProps {
 		showModal: boolean;
@@ -212,11 +213,7 @@
 				</Tabs.Content>
 			</Tabs.Root>
 
-			<button
-				type="submit"
-				class="mx-auto w-3/5 rounded-full bg-gradient-to-r from-blue-500 to-rose-400 px-7 py-2 text-base text-white transition duration-200 ease-in-out hover:-translate-y-0.5 hover:scale-105"
-				>Create Shipment</button
-			>
+			<PillButton text="Create Shipment" />
 		</form>
 	</Modal>
 {/if}

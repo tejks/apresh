@@ -203,10 +203,6 @@ async fn buy_shipment(carrier_name: String, shipment_id: ShipmentIdInner) -> Res
         return Err(e.to_string());
     }
 
-    // if let Err(e) = transfer_in(transfer_in_args).await {
-    //     ic_cdk::trap(&e.to_string())
-    // }
-
     Ok(())
 }
 

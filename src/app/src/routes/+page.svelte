@@ -103,9 +103,9 @@
 		if (!data.settleId || !data.settleSecret) return;
 
 		console.log('here');
-		anonymousBackend
-			.finalizeShipment(BigInt(data.settleId), [data.settleSecret])
-			.then((res) => console.log('endpoint res ', res));
+		// anonymousBackend
+		// 	.finalizeShipment(BigInt(data.settleId), [data.settleSecret])
+		// 	.then((res) => console.log('endpoint res ', res));
 	});
 
 	async function getQrCode(url: string) {
@@ -130,6 +130,8 @@
 		});
 	}
 </script>
+
+<Marker callback={() => selectShipment(BigInt(1))} location={{ lat: 43, lng: 43 }} name={'dupa'} />
 
 <CreateShipmentForm showModal={showAddModal} onClose={() => (showAddModal = false)} />
 
@@ -160,12 +162,10 @@
 		{/if}
 	</Modal>
 {:else}
-	{#if !showAddModal}
-		{#each data.shipments as { id, info }}
-			<Marker callback={() => selectShipment(id)} location={info.source} name={id.toString()}
-			></Marker>
-		{/each}
-	{/if}
+	{#each data.shipments as { id, info }}
+		<Marker callback={() => selectShipment(id)} location={info.source} name={id.toString()}
+		></Marker>
+	{/each}
 
 	<Modal bind:showModal={showBuyModal} onClose={() => (showBuyModal = false)}>
 		{#if selected}
