@@ -167,9 +167,9 @@ async fn finalize_shipment(
         return Err(e.to_string());
     }
 
-    if let Err(e) = transfer::transfer_out(transfer_out_carrier_args).await {
-        ic_cdk::trap(&e.to_string())
-    }
+    // if let Err(e) = transfer::transfer_out(transfer_out_carrier_args).await {
+    //     ic_cdk::trap(&e.to_string())
+    // }
 
     Ok(())
 }
@@ -225,6 +225,8 @@ async fn create_shipment(
     qr_options: QrCodeOptions,
     shipment_info: ShipmentInfo,
 ) -> Result<(Vec<u8>, ShipmentIdInner), String> {
+    ic_cdk::print("Creating a shipment");
+
     let customer_id = ic_cdk::caller();
     check_anonymous(customer_id)?;
 
