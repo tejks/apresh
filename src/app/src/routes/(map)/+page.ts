@@ -1,10 +1,11 @@
 import type { Shipment } from '$declarations/contract/contract.did';
-import { anonymousBackend } from '$lib/canisters';
-import { stateWallet, wallet } from '$lib/wallet.svelte';
+import { fetchBackend } from '$lib/canisters';
+import { connection } from '$lib/connection.svelte';
+import { match } from '$lib/utils';
 import type { LoadEvent } from '@sveltejs/kit';
 
 /** @type {import('./$types').PageLoad } */
-export async function load({ url }: LoadEvent): Promise<{
+export async function load({ fetch, depends, url }: LoadEvent): Promise<{
 	shipments: Shipment[];
 	registeredCarrier: boolean;
 	registeredCustomer: boolean;
@@ -13,7 +14,8 @@ export async function load({ url }: LoadEvent): Promise<{
 	settleSecret: string | null;
 	settleId: string | null;
 }> {
-	const shipments = await anonymousBackend.listPendingShipments();
+	depends('shipments:pending');
+	const shipments = await fetchBackend(fetch).listPendingShipments();
 
 	const settleSecret = url.searchParams.get('settleSecret');
 	const settleId = url.searchParams.get('settleId');
@@ -23,7 +25,9 @@ export async function load({ url }: LoadEvent): Promise<{
 	let carried: Shipment[] = [];
 	let created: Shipment[] = [];
 
-	if (stateWallet.actor) {
+	const actor = connection.actor;
+
+	if (actor !== null) {
 		console.log('Wallet connected');
 
 		// const [car, cus] = await stateWallet.actor.roles();
@@ -33,9 +37,9 @@ export async function load({ url }: LoadEvent): Promise<{
 		// if (registeredCarrier) {
 		console.log('Carrier registered');
 
-		let [car, cus] = await stateWallet.actor.listUserShipments();
-		carried = car;
-		created = cus;
+		let [car, cus] = await actor.listUserShipments();
+		carried = car.filter((shipment) => !match(shipment.status, 'Delivered'));
+		created = cus.filter((shipment) => !match(shipment.status, 'Delivered'));
 		// }
 	}
 

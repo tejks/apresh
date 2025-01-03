@@ -23,7 +23,7 @@ export default defineConfig({
 	server: {
 		proxy: {
 			'/api': {
-				target: 'http://127.0.0.1:4943',
+				target: 'http://[::1]:4943',
 				changeOrigin: true
 			}
 		}
@@ -42,7 +42,7 @@ export default defineConfig({
 				replacement: fileURLToPath(new URL('../declarations', import.meta.url))
 			},
 			{
-				find: '$components',
+				find: 'components',
 				replacement: fileURLToPath(new URL('./src/components', import.meta.url))
 			}
 		]

@@ -167,9 +167,11 @@ async fn finalize_shipment(
         return Err(e.to_string());
     }
 
-    if let Err(e) = transfer::transfer_out(transfer_out_carrier_args).await {
-        ic_cdk::trap(&e.to_string())
-    }
+    // if let Err(e) = transfer::transfer_out(transfer_out_carrier_args).await {
+    //     ic_cdk::trap(&e.to_string())
+    // }
+
+    ic_cdk::print(format!("Shipment finalized: {:?}", shipment_id).as_str());
 
     Ok(())
 }
@@ -203,6 +205,8 @@ async fn buy_shipment(carrier_name: String, shipment_id: ShipmentIdInner) -> Res
         return Err(e.to_string());
     }
 
+    ic_cdk::print(format!("Shipment bought: {:?}", shipment_id).as_str());
+
     Ok(())
 }
 
@@ -225,6 +229,8 @@ async fn create_shipment(
     qr_options: QrCodeOptions,
     shipment_info: ShipmentInfo,
 ) -> Result<(Vec<u8>, ShipmentIdInner), String> {
+    ic_cdk::print("Creating a shipment");
+
     let customer_id = ic_cdk::caller();
     check_anonymous(customer_id)?;
 
@@ -257,6 +263,7 @@ async fn create_shipment(
 
     let qr_code = qr::generate(qr_options).unwrap_or_else(|err| ic_cdk::trap(&err.to_string()));
 
+    ic_cdk::print(format!("Shipment created: {:?}", shipment_id).as_str());
     Ok((qr_code, shipment_id))
 }
 
